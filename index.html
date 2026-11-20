@@ -1064,7 +1064,7 @@ Yosh matematiklar va fiziklar maktabi nomi bilan 1991 yilda ustoz To’xtamurod 
           <button class="test-btn danger" onclick="resetToLogin()">Orqaga</button>
         </div>
 
-        <div id="admin-creator" style="display: none;">
+       <div id="admin-creator" style="display: none;">
           <p style="color: #34d399; margin-bottom: 12px; font-weight: 600;">Yangi savol qo‘shish:</p>
           <input type="text" id="q-text" class="test-input" placeholder="Savol matnini kiriting..." />
           <input type="text" id="q-opt0" class="test-input" placeholder="A variant..." />
@@ -1084,11 +1084,14 @@ Yosh matematiklar va fiziklar maktabi nomi bilan 1991 yilda ustoz To’xtamurod 
             <button class="test-btn danger" onclick="clearAllQuestions()">Barcha eski testlarni o‘chirish</button>
             <button class="test-btn" onclick="resetToLogin()">Chiqish</button>
           </div>
-          <p id="admin-status" style="margin-top: 12px; color: #67e8f9; font-size: 0.9rem;"></p>
-        </div>
-      </div>
+          
+         <p id="admin-status" style="margin-top: 12px; color: #67e8f9; font-size: 0.9rem;"></p>
 
-    </div>
+          <!-- Savollar ro'yxati chiqadigan joy -->
+          <div id="admin-questions-list" style="margin-top: 15px; max-height: 250px; overflow-y: auto; text-align: left;"></div>
+
+        </div> <!-- #admin-creator yopilishi -->
+      </div> <!-- #admin-panel-view yopilishi -->
   </div>
 <script>
     // JSONbin.io sozlamalari
@@ -1100,10 +1103,84 @@ Yosh matematiklar va fiziklar maktabi nomi bilan 1991 yilda ustoz To’xtamurod 
     let isTestRunning = false;
     let timerInterval;
     let timeLeft = 2 * 60 * 60;
+let questions = [];
+    let isTestRunning = false;
+    let timerInterval;
+    let timeLeft = 2 * 60 * 60;
 
-    // Savollarni bulutdan o'qib olish
-    async function loadQuestionsFromCloud() {
+    // ⭐ MANA BU YERGA (loadQuestionsFromCloud funksiyasidan oldinga) QO'YASIZ:
+
+    // Admin statusi va savollar ro'yxatini chiqarish hamda har biriga o'chirish tugmasini berish
+    async function updateAdminStatus() {
+      const statusEl = document.getElementById('admin-status');
+      if (statusEl) {
+        statusEl.innerText = `Hozir bazada jami ${questions.length} ta savol mavjud.`;
+      }
+
+      const container = document.getElementById('admin-questions-list');
+      if (!container) return;
+      container.innerHTML = '';
+
+      if (questions.length === 0) {
+        container.innerHTML = '<p style="color: #94a3b8; font-size: 0.85rem; text-align: center;">Hozircha savollar mavjud emas.</p>';
+        return;
+      }
+
+      questions.forEach((item, index) => {
+        container.innerHTML += `
+          <div style="background: rgba(255, 255, 255, 0.05); padding: 10px; margin-bottom: 8px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center;">
+            <div style="color: #fff; font-size: 13px; padding-right: 8px; word-break: break-all;">
+              <strong>${item.q}</strong>
+            </div>
+            <button onclick="deleteSpecificQuestion(${index})" class="test-btn danger" style="padding: 6px 10px; font-size: 12px; width: auto; margin: 0;">O'chirish</button>
+          </div>
+        `;
+      });
+    }
+
+    // Faqat bitta tanlangan savolni bazadan o'chirish
+    async function deleteSpecificQuestion(index) {
+      if (!confirm(`Haqiqatan ham ushbu savolni o'chirmoqchimisiz?`)) {
+        return;
+      }
+
       try {
+        let res = await fetch(JSONBIN_URL, {
+          headers: { 'X-Master-Key': API_KEY }
+        });
+        let data = await res.json();
+        let currentList = data.record.questions || [];
+
+        // Tanlangan savolni o'chirib tashlaymiz
+        currentList.splice(index, 1);
+
+        // Qolgan savollarning raqamlarini tartibga keltiramiz (1, 2, 3...)
+        currentList.forEach((item, idx) => {
+          let cleanText = item.q.replace(/^\d+\.\s*/, '');
+          item.q = `${idx + 1}. ${cleanText}`;
+        });
+
+        let updateRes = await fetch(JSONBIN_URL, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Master-Key': API_KEY
+          },
+          body: JSON.stringify({ questions: currentList })
+        });
+
+        if (updateRes.ok) {
+          alert("Savol muvaffaqiyatli o'chirildi!");
+          await loadQuestionsFromCloud();
+        } else {
+          alert("O'chirishda xatolik yuz berdi!");
+        }
+      } catch (error) {
+        console.error("Tarmoq xatosi:", error);
+        alert("Tarmoqda xatolik yuz berdi!");
+      }
+    }
+   
         let response = await fetch(JSONBIN_URL, {
           headers: {
             'X-Master-Key': API_KEY
