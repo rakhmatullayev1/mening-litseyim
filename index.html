@@ -25,27 +25,30 @@
       padding: 0;
     }
 
-   body {
+  body {
       min-height: 100vh;
       font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-      background-color: #090d16;
       color: var(--text-main);
       overflow-x: hidden;
       position: relative;
       padding: 24px 24px 72px;
-    }
-
-    /* Orqa fondagi litsey rasmi (ham blur, ham aniq ko'rinadigan qilib) */
-    .bg-lyceum {
-      position: fixed;
-      inset: -15px; /* Blur chetlari oqarib qolmasligi uchun */
+      
+      /* Kesin çalışan litsey arka plan resmi */
       background-image: url('https://cdn.uza.uz/2025/08/14/13/52/LioMIMrhgZUSiOGjtyim7fjZbs6XTHm5_front.jpg');
       background-size: cover;
       background-position: center;
-      filter: blur(4px) brightness(0.65); /* 4px yengil xiralik, 0.65 yorug'lik */
-      z-index: 0;
-      pointer-events: none;
+      background-attachment: fixed;
+      background-color: #090d16;
     }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: rgba(9, 13, 22, 0.2); /* Görselin net görünmesi için hafif perde */
+      backdrop-filter: blur(0px);
+      z-index: -1;
+    }    
     /* Orqa fon yorug'liklari 
     .ambient-glow {
       position: fixed;
@@ -583,7 +586,7 @@
   <input type="checkbox" id="modal-about" class="hidden-check" />
   <input type="checkbox" id="modal-contact" class="hidden-check" />
   <input type="checkbox" id="modal-achievements" class="hidden-check" />
-<div class="bg-lyceum"></div>
+<!-- <div class="bg-lyceum"></div> -->
   <div class="ambient-glow glow-one"></div>
   <div class="ambient-glow glow-two"></div>
   <div class="ambient-glow glow-three"></div>
