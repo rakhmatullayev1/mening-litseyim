@@ -1091,24 +1091,45 @@ Yosh matematiklar va fiziklar maktabi nomi bilan 1991 yilda ustoz To’xtamurod 
     </div>
   </div>
 
-  <script>
-    const defaultQuestions = [
-      {
-        q: "1. Kvadrat tenglamaning diskriminanti D < 0 bo‘lsa, tenglama nechta haqiqiy ildizga ega bo‘ladi?",
-        options: ["2 ta", "1 ta", "Haqiqiy ildizga ega emas", "Cheksiz ko‘p"],
-        correct: 2
-      },
-      {
-        q: "2. Nyutonning ikkinchi qonuni formulasi qaysi?",
-        options: ["F = m * a", "E = m * c²", "P = m * g", "A = F * s"],
-        correct: 0
-      }
-    ];
+<script>
+    // SheetDB API manzili
+    const SHEETDB_URL = 'https://sheetdb.io/api/v1/w5wp675kcb9dt';
 
-    let questions = JSON.parse(localStorage.getItem('litsey_tests')) || defaultQuestions;
+    let questions = [];
     let isTestRunning = false;
     let timerInterval;
     let timeLeft = 2 * 60 * 60;
+
+    // Sahifa ochilganda savollarni bazadan yuklab olamiz
+    async function loadQuestionsFromCloud() {
+      try {
+        let response = await fetch(SHEETDB_URL);
+        let data = await response.json();
+        
+        // Google Jadvalidan kelgan ma'lumotlarni test formatiga o'g'iramiz
+        questions = data.map((item, index) => {
+          return {
+            q: `${index + 1}. ${item.Savol || item.savol}`,
+            options: [
+              item.A || '',
+              item.B || '',
+              item.C || '',
+              item.D || ''
+            ],
+            correct: parseInt(item.togriJavob || item.TogriJavob || 0)
+          };
+        });
+      } catch (error) {
+        console.error("Savolarni yuklashda xatolik:", error);
+        questions = [];
+      }
+      updateAdminStatus();
+    }
+
+    // Sahifa yuklanganda ishga tushadi
+    window.addEventListener('DOMContentLoaded', () => {
+      loadQuestionsFromCloud();
+    });
 
     document.addEventListener("visibilitychange", function() {
       if (document.hidden && isTestRunning) {
@@ -1116,16 +1137,18 @@ Yosh matematiklar va fiziklar maktabi nomi bilan 1991 yilda ustoz To’xtamurod 
       }
     });
 
-    function startTest() {
+    async function startTest() {
       const nameInput = document.getElementById('student-name').value.trim();
       if (!nameInput) {
         alert("Iltimos, avval ism va familiyangizni kiriting!");
         return;
       }
 
-      questions = JSON.parse(localStorage.getItem('litsey_tests')) || defaultQuestions;
+      // Test boshlanishidan oldin eng yangi savollarni tortib olamiz
+      await loadQuestionsFromCloud();
+
       if (questions.length === 0) {
-        alert("Hozircha test savollari yuklanmagan!");
+        alert("Hozircha test savollari yuklanmagan yoki internetda xatolik bor!");
         return;
       }
 
@@ -1144,7 +1167,7 @@ Yosh matematiklar va fiziklar maktabi nomi bilan 1991 yilda ustoz To’xtamurod 
       container.innerHTML = '';
       questions.forEach((item, index) => {
         let html = `<div class="question-card">
-          <div class="question-title">${index + 1}. ${item.q}</div>`;
+          <div class="question-title">${item.q}</div>`;
         item.options.forEach((opt, optIndex) => {
           html += `
             <label class="option-label">
@@ -1211,6 +1234,7 @@ Yosh matematiklar va fiziklar maktabi nomi bilan 1991 yilda ustoz To’xtamurod 
       document.getElementById('test-active-view').style.display = 'none';
       document.getElementById('test-result-view').style.display = 'none';
       document.getElementById('admin-panel-view').style.display = 'none';
+      loadQuestionsFromCloud();
     }
 
     function showAdminLogin() {
@@ -1231,41 +1255,73 @@ Yosh matematiklar va fiziklar maktabi nomi bilan 1991 yilda ustoz To’xtamurod 
       }
     }
 
-    function addQuestion() {
+    async function addQuestion() {
       const q = document.getElementById('q-text').value.trim();
       const o0 = document.getElementById('q-opt0').value.trim();
       const o1 = document.getElementById('q-opt1').value.trim();
       const o2 = document.getElementById('q-opt2').value.trim();
       const o3 = document.getElementById('q-opt3').value.trim();
-      const correct = parseInt(document.getElementById('q-correct').value);
+      const correct = document.getElementById('q-correct').value;
 
       if (!q || !o0 || !o1 || !o2 || !o3) {
         alert("Barcha maydonlarni to‘ldiring!");
         return;
       }
 
-      let currentTests = JSON.parse(localStorage.getItem('litsey_tests')) || [];
-      currentTests.push({ q, options: [o0, o1, o2, o3], correct });
-      localStorage.setItem('litsey_tests', JSON.stringify(currentTests));
+      // Google Jadvallari ustun nomlariga moslab obyekt tuzamiz
+      const newRow = {
+        Savol: q,
+        A: o0,
+        B: o1,
+        C: o2,
+        D: o3,
+        togriJavob: correct
+      };
 
-      document.getElementById('q-text').value = '';
-      document.getElementById('q-opt0').value = '';
-      document.getElementById('q-opt1').value = '';
-      document.getElementById('q-opt2').value = '';
-      document.getElementById('q-opt3').value = '';
-      updateAdminStatus();
-    }
+      try {
+        // SheetDB ga ma'lumotni POST so'rovi orqali yuboramiz (hamma uchun saqlanadi)
+        let response = await fetch(SHEETDB_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ data: [newRow] })
+        });
 
-    function clearAllQuestions() {
-      if (confirm("Haqiqatan ham barcha savollarni o‘chirmoqchimisiz?")) {
-        localStorage.setItem('litsey_tests', JSON.stringify([]));
-        updateAdminStatus();
+        if (response.ok) {
+          alert("Savol barcha uchun muvaffaqiyatli qo'shildi!");
+          document.getElementById('q-text').value = '';
+          document.getElementById('q-opt0').value = '';
+          document.getElementById('q-opt1').value = '';
+          document.getElementById('q-opt2').value = '';
+          document.getElementById('q-opt3').value = '';
+          await loadQuestionsFromCloud();
+        } else {
+          alert("Saqlashda xatolik yuz berdi!");
+        }
+      } catch (error) {
+        console.error(error);
+        alert("Tarmoqda xatolik yuz berdi!");
       }
     }
 
-    function updateAdminStatus() {
-      let currentTests = JSON.parse(localStorage.getItem('litsey_tests')) || [];
-      document.getElementById('admin-status').innerText = `Hozir bazada jami ${currentTests.length} ta savol mavjud.`;
+    async function clearAllQuestions() {
+      if (confirm("Haqiqatan ham Google jadvalidagi barcha savollarni o‘chirmoqchimisiz?")) {
+        try {
+          // SheetDB da hammasini o'chirish uchun DELETE so'rovi (all=true)
+          await fetch(`${SHEETDB_URL}/all`, {
+            method: 'DELETE'
+          });
+          alert("Barcha savollar o'chirildi!");
+          await loadQuestionsFromCloud();
+        } catch (error) {
+          console.error(error);
+          alert("O'chirishda xatolik yuz berdi!");
+        }
+      }
+    }
+
+    async function updateAdminStatus() {
+      await loadQuestionsFromCloud();
+      document.getElementById('admin-status').innerText = `Hozir bazada jami ${questions.length} ta savol mavjud.`;
     }
   </script>
 
