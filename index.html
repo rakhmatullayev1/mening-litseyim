@@ -33,11 +33,11 @@
       position: relative;
       padding: 24px 24px 72px;
       
-      
+      /* Kesin çalışan litsey arka plan resmi */
       background-image: url('https://cdn.uza.uz/2025/08/14/13/52/LioMIMrhgZUSiOGjtyim7fjZbs6XTHm5_front.jpg');
       background-size: cover;
       background-position: center;
-     /* background-attachment: fixed; */ 
+      background-attachment: fixed;
       background-color: #090d16;
     }
 
@@ -455,10 +455,11 @@
       backdrop-filter: blur(12px);
     }
 
-    #modal-apply:checked ~ .backdrop-apply,
+   #modal-apply:checked ~ .backdrop-apply,
     #modal-about:checked ~ .backdrop-about,
     #modal-contact:checked ~ .backdrop-contact,
-    #modal-achievements:checked ~ .backdrop-achievements {
+    #modal-achievements:checked ~ .backdrop-achievements,
+    #modal-test:checked ~ .backdrop-test {
       display: grid;
     }
 
@@ -606,6 +607,122 @@
         flex-wrap: wrap;
       }
     }
+    /* ONLAYN TEST VA ADMIN PANEL STILLARI */
+    .test-box {
+      max-width: 780px;
+      width: 100%;
+    }
+
+    .test-input {
+      width: 100%;
+      padding: 14px 16px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border-light);
+      color: #ffffff;
+      font-size: 1rem;
+      margin-bottom: 14px;
+      outline: none;
+    }
+
+    .test-input:focus {
+      border-color: var(--accent-3);
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .test-btn {
+      padding: 13px 20px;
+      border-radius: 14px;
+      border: none;
+      font-weight: 700;
+      font-size: 0.96rem;
+      cursor: pointer;
+      color: #ffffff;
+      background: linear-gradient(135deg, #6366f1, #06b6d4);
+      transition: transform 0.2s ease, opacity 0.2s ease;
+    }
+
+    .test-btn:hover {
+      transform: translateY(-2px);
+      opacity: 0.95;
+    }
+
+    .test-btn.danger {
+      background: linear-gradient(135deg, #ef4444, #ec4899);
+    }
+
+    .test-btn.success {
+      background: linear-gradient(135deg, #10b981, #059669);
+    }
+
+    .timer-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 18px;
+      border-radius: 14px;
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      margin-bottom: 20px;
+      font-weight: 700;
+      color: #fca5a5;
+    }
+
+    .question-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-light);
+      border-radius: 16px;
+      padding: 18px;
+      margin-bottom: 16px;
+    }
+
+    .question-title {
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: #f8fafc;
+    }
+
+    .option-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.04);
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .option-label:hover {
+      background: rgba(99, 102, 241, 0.2);
+    }
+
+    .result-card {
+      text-align: center;
+      padding: 24px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(6, 182, 212, 0.15));
+      border: 1px solid rgba(52, 211, 153, 0.4);
+    }
+
+    .result-score {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: #34d399;
+      margin: 12px 0;
+    }
+
+    .admin-toggle-link {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      text-decoration: underline;
+      cursor: pointer;
+      display: inline-block;
+      margin-top: 14px;
+    }
+
   </style>
 </head>
 <body>
@@ -616,6 +733,7 @@
   <input type="checkbox" id="modal-about" class="hidden-check" />
   <input type="checkbox" id="modal-contact" class="hidden-check" />
   <input type="checkbox" id="modal-achievements" class="hidden-check" />
+  <input type="checkbox" id="modal-test" class="hidden-check" />
 <!-- <div class="bg-lyceum"></div> -->
   <div class="ambient-glow glow-one"></div>
   <div class="ambient-glow glow-two"></div>
@@ -645,6 +763,10 @@
         </label>
         <label for="modal-achievements" class="drawer-item">
           <span>Litsey yutuqlari</span>
+          <span>→</span>
+        </label>
+        <label for="modal-test" class="drawer-item" style="border-color: rgba(6, 182, 212, 0.5); color: #67e8f9;">
+          <span>📝 Yakshanba onlayn testi</span>
           <span>→</span>
         </label>
       </nav>
@@ -880,11 +1002,272 @@ Yosh matematiklar va fiziklar maktabi nomi bilan 1991 yilda ustoz To’xtamurod 
       <path d="M12 2C6.48 2 2 6.48 2 12c0 1.85.5 3.58 1.37 5.06L2 22l5.1-1.35C8.55 21.36 10.23 22 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2zm1 14h-2v-2h2v2zm0-4h-2V7h2v5z"/>
     </svg>
   </a>
+  
 
   <!-- ENG PASTKI FOOTER -->
   <footer class="creator-footer">
     Sayt yaratuvchisi: <span>Azimjon Raxmatullayev</span>
   </footer>
+
+
+    <!-- MODAL 5: Yakshanba Onlayn Testi va Admin Panel -->
+  <div class="modal-backdrop backdrop-test">
+    <div class="modal-box test-box">
+      <div class="modal-head">
+        <h2 class="modal-title" id="test-modal-heading">Yakshanba Onlayn Testi</h2>
+        <label for="modal-test" class="close-icon-btn" onclick="forceCloseTest()">✕</label>
+      </div>
+
+      <!-- 1. KIRISH QISMI (Ism-familiya kiritish) -->
+      <div id="test-login-view">
+        <p style="color: #cbd5e1; margin-bottom: 14px; line-height: 1.6;">
+          Diqqat! Testga kirganingizdan so‘ng <strong>2 soatlik</strong> taymer ishga tushadi. 
+          Test vaqtida <strong>boshqa saytga yoki ilovaga o‘tsangiz</strong>, test avtomatik ravishda yakunlanadi!
+        </p>
+        <input type="text" id="student-name" class="test-input" placeholder="Ism va familiyangizni kiriting (Masalan: Aliyev Vali)" />
+        <button class="test-btn" style="width: 100%;" onclick="startTest()">Testni boshlash →</button>
+        
+        <div style="text-align: right;">
+          <span class="admin-toggle-link" onclick="showAdminLogin()">🔒 Ustoz (Admin) uchun test yuklash</span>
+        </div>
+      </div>
+
+      <!-- 2. TEST JARAYONI QISMI -->
+      <div id="test-active-view" style="display: none;">
+        <div class="timer-bar">
+          <span id="display-student-name">O‘quvchi: ...</span>
+          <span>⏳ Qolgan vaqt: <span id="timer-display">02:00:00</span></span>
+        </div>
+        
+        <div id="questions-container"></div>
+
+        <button class="test-btn success" style="width: 100%; margin-top: 10px;" onclick="finishTest('O‘quvchi o‘zi yakunladi')">Testni yakunlash va natijani ko‘rish</button>
+      </div>
+
+      <!-- 3. NATIJA QISMI -->
+      <div id="test-result-view" style="display: none;">
+        <div class="result-card">
+          <div style="font-size: 0.9rem; color: #94a3b8;" id="finish-reason">Test yakunlandi</div>
+          <h3 style="font-size: 1.4rem; margin-top: 6px; color: #fff;" id="res-name">Ism Familiya</h3>
+          <div class="result-score" id="res-percentage">0%</div>
+          <p style="font-size: 1.1rem; color: #e2e8f0;" id="res-details">0 ta savoldan 0 tasiga to‘g‘ri javob berdingiz</p>
+          <button class="test-btn" style="margin-top: 20px;" onclick="resetToLogin()">Bosh sahifaga qaytish</button>
+        </div>
+      </div>
+
+      <!-- 4. ADMIN PANEL (Test yuklash) -->
+      <div id="admin-panel-view" style="display: none;">
+        <div id="admin-auth">
+          <p style="color: #cbd5e1; margin-bottom: 10px;">Test yuklash uchun admin parolini kiriting (Standart parol: <b>litsey2026</b>):</p>
+          <input type="password" id="admin-pass" class="test-input" placeholder="Parol..." />
+          <button class="test-btn" onclick="verifyAdmin()">Kirish</button>
+          <button class="test-btn danger" onclick="resetToLogin()">Orqaga</button>
+        </div>
+
+        <div id="admin-creator" style="display: none;">
+          <p style="color: #34d399; margin-bottom: 12px; font-weight: 600;">Yangi savol qo‘shish:</p>
+          <input type="text" id="q-text" class="test-input" placeholder="Savol matnini kiriting..." />
+          <input type="text" id="q-opt0" class="test-input" placeholder="A variant..." />
+          <input type="text" id="q-opt1" class="test-input" placeholder="B variant..." />
+          <input type="text" id="q-opt2" class="test-input" placeholder="C variant..." />
+          <input type="text" id="q-opt3" class="test-input" placeholder="D variant..." />
+          
+          <select id="q-correct" class="test-input" style="background: #1e293b;">
+            <option value="0">To‘g‘ri javob: A variant</option>
+            <option value="1">To‘g‘ri javob: B variant</option>
+            <option value="2">To‘g‘ri javob: C variant</option>
+            <option value="3">To‘g‘ri javob: D variant</option>
+          </select>
+
+          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <button class="test-btn success" onclick="addQuestion()">+ Savolni saqlash</button>
+            <button class="test-btn danger" onclick="clearAllQuestions()">Barcha eski testlarni o‘chirish</button>
+            <button class="test-btn" onclick="resetToLogin()">Chiqish</button>
+          </div>
+          <p id="admin-status" style="margin-top: 12px; color: #67e8f9; font-size: 0.9rem;"></p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    const defaultQuestions = [
+      {
+        q: "1. Kvadrat tenglamaning diskriminanti D < 0 bo‘lsa, tenglama nechta haqiqiy ildizga ega bo‘ladi?",
+        options: ["2 ta", "1 ta", "Haqiqiy ildizga ega emas", "Cheksiz ko‘p"],
+        correct: 2
+      },
+      {
+        q: "2. Nyutonning ikkinchi qonuni formulasi qaysi?",
+        options: ["F = m * a", "E = m * c²", "P = m * g", "A = F * s"],
+        correct: 0
+      }
+    ];
+
+    let questions = JSON.parse(localStorage.getItem('litsey_tests')) || defaultQuestions;
+    let isTestRunning = false;
+    let timerInterval;
+    let timeLeft = 2 * 60 * 60;
+
+    document.addEventListener("visibilitychange", function() {
+      if (document.hidden && isTestRunning) {
+        finishTest("Diqqat! Boshqa oynaga o‘tilgani sababli test avtomatik yakunlandi.");
+      }
+    });
+
+    function startTest() {
+      const nameInput = document.getElementById('student-name').value.trim();
+      if (!nameInput) {
+        alert("Iltimos, avval ism va familiyangizni kiriting!");
+        return;
+      }
+
+      questions = JSON.parse(localStorage.getItem('litsey_tests')) || defaultQuestions;
+      if (questions.length === 0) {
+        alert("Hozircha test savollari yuklanmagan!");
+        return;
+      }
+
+      document.getElementById('display-student-name').innerText = "O‘quvchi: " + nameInput;
+      document.getElementById('test-login-view').style.display = 'none';
+      document.getElementById('test-active-view').style.display = 'block';
+
+      renderQuestions();
+      isTestRunning = true;
+      timeLeft = 7200;
+      startTimer();
+    }
+
+    function renderQuestions() {
+      const container = document.getElementById('questions-container');
+      container.innerHTML = '';
+      questions.forEach((item, index) => {
+        let html = `<div class="question-card">
+          <div class="question-title">${index + 1}. ${item.q}</div>`;
+        item.options.forEach((opt, optIndex) => {
+          html += `
+            <label class="option-label">
+              <input type="radio" name="q_${index}" value="${optIndex}">
+              <span>${opt}</span>
+            </label>`;
+        });
+        html += `</div>`;
+        container.innerHTML += html;
+      });
+    }
+
+    function startTimer() {
+      clearInterval(timerInterval);
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        let hrs = Math.floor(timeLeft / 3600);
+        let mins = Math.floor((timeLeft % 3600) / 60);
+        let secs = timeLeft % 60;
+
+        document.getElementById('timer-display').innerText = 
+          `${String(hrs).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+
+        if (timeLeft <= 0) {
+          finishTest("Ajratilgan 2 soat vaqt tugadi!");
+        }
+      }, 1000);
+    }
+
+    function finishTest(reasonText) {
+      if (!isTestRunning) return;
+      isTestRunning = false;
+      clearInterval(timerInterval);
+
+      let score = 0;
+      questions.forEach((item, index) => {
+        const selected = document.querySelector(`input[name="q_${index}"]:checked`);
+        if (selected && parseInt(selected.value) === item.correct) {
+          score++;
+        }
+      });
+
+      const percentage = Math.round((score / questions.length) * 100);
+      const name = document.getElementById('student-name').value;
+
+      document.getElementById('test-active-view').style.display = 'none';
+      document.getElementById('test-result-view').style.display = 'block';
+      document.getElementById('finish-reason').innerText = reasonText;
+      document.getElementById('res-name').innerText = name;
+      document.getElementById('res-percentage').innerText = percentage + "%";
+      document.getElementById('res-details').innerText = `${questions.length} ta savoldan ${score} tasiga to‘g‘ri javob berdingiz.`;
+    }
+
+    function forceCloseTest() {
+      if (isTestRunning) {
+        finishTest("Test oynasi yopilgani sababli yakunlandi.");
+      }
+    }
+
+    function resetToLogin() {
+      isTestRunning = false;
+      clearInterval(timerInterval);
+      document.getElementById('test-login-view').style.display = 'block';
+      document.getElementById('test-active-view').style.display = 'none';
+      document.getElementById('test-result-view').style.display = 'none';
+      document.getElementById('admin-panel-view').style.display = 'none';
+    }
+
+    function showAdminLogin() {
+      document.getElementById('test-login-view').style.display = 'none';
+      document.getElementById('admin-panel-view').style.display = 'block';
+      document.getElementById('admin-auth').style.display = 'block';
+      document.getElementById('admin-creator').style.display = 'none';
+    }
+
+    function verifyAdmin() {
+      const pass = document.getElementById('admin-pass').value;
+      if (pass === 'litsey2026') {
+        document.getElementById('admin-auth').style.display = 'none';
+        document.getElementById('admin-creator').style.display = 'block';
+        updateAdminStatus();
+      } else {
+        alert("Parol noto‘g‘ri!");
+      }
+    }
+
+    function addQuestion() {
+      const q = document.getElementById('q-text').value.trim();
+      const o0 = document.getElementById('q-opt0').value.trim();
+      const o1 = document.getElementById('q-opt1').value.trim();
+      const o2 = document.getElementById('q-opt2').value.trim();
+      const o3 = document.getElementById('q-opt3').value.trim();
+      const correct = parseInt(document.getElementById('q-correct').value);
+
+      if (!q || !o0 || !o1 || !o2 || !o3) {
+        alert("Barcha maydonlarni to‘ldiring!");
+        return;
+      }
+
+      let currentTests = JSON.parse(localStorage.getItem('litsey_tests')) || [];
+      currentTests.push({ q, options: [o0, o1, o2, o3], correct });
+      localStorage.setItem('litsey_tests', JSON.stringify(currentTests));
+
+      document.getElementById('q-text').value = '';
+      document.getElementById('q-opt0').value = '';
+      document.getElementById('q-opt1').value = '';
+      document.getElementById('q-opt2').value = '';
+      document.getElementById('q-opt3').value = '';
+      updateAdminStatus();
+    }
+
+    function clearAllQuestions() {
+      if (confirm("Haqiqatan ham barcha savollarni o‘chirmoqchimisiz?")) {
+        localStorage.setItem('litsey_tests', JSON.stringify([]));
+        updateAdminStatus();
+      }
+    }
+
+    function updateAdminStatus() {
+      let currentTests = JSON.parse(localStorage.getItem('litsey_tests')) || [];
+      document.getElementById('admin-status').innerText = `Hozir bazada jami ${currentTests.length} ta savol mavjud.`;
+    }
+  </script>
 
 </body>
 </html>
