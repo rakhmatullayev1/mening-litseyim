@@ -1090,37 +1090,25 @@ Yosh matematiklar va fiziklar maktabi nomi bilan 1991 yilda ustoz To’xtamurod 
 
     </div>
   </div>
-<script>
-    // JSONbin.io sozlamalari
-    const BIN_ID = '6b00889bac6210605a9809c7';
-    const API_KEY = '$2a$10$sV2PvsmMrvPvwNuELw0mH.fTFU6.mhXwAoleFLebZ2rDbQl1oIT8C';
-    const JSONBIN_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
 
-    let questions = [];
+  <script>
+    const defaultQuestions = [
+      {
+        q: "1. Kvadrat tenglamaning diskriminanti D < 0 bo‘lsa, tenglama nechta haqiqiy ildizga ega bo‘ladi?",
+        options: ["2 ta", "1 ta", "Haqiqiy ildizga ega emas", "Cheksiz ko‘p"],
+        correct: 2
+      },
+      {
+        q: "2. Nyutonning ikkinchi qonuni formulasi qaysi?",
+        options: ["F = m * a", "E = m * c²", "P = m * g", "A = F * s"],
+        correct: 0
+      }
+    ];
+
+    let questions = JSON.parse(localStorage.getItem('litsey_tests')) || defaultQuestions;
     let isTestRunning = false;
     let timerInterval;
     let timeLeft = 2 * 60 * 60;
-
-    // Savollarni bulutdan o'qib olish
-    async function loadQuestionsFromCloud() {
-      try {
-        let response = await fetch(JSONBIN_URL, {
-          headers: {
-            'X-Master-Key': API_KEY
-          }
-        });
-        let data = await response.json();
-        questions = data.record.questions || [];
-      } catch (error) {
-        console.error("Savollarni yuklashda xatolik:", error);
-        questions = [];
-      }
-      updateAdminStatus();
-    }
-
-    window.addEventListener('DOMContentLoaded', () => {
-      loadQuestionsFromCloud();
-    });
 
     document.addEventListener("visibilitychange", function() {
       if (document.hidden && isTestRunning) {
@@ -1128,15 +1116,14 @@ Yosh matematiklar va fiziklar maktabi nomi bilan 1991 yilda ustoz To’xtamurod 
       }
     });
 
-    async function startTest() {
+    function startTest() {
       const nameInput = document.getElementById('student-name').value.trim();
       if (!nameInput) {
         alert("Iltimos, avval ism va familiyangizni kiriting!");
         return;
       }
 
-      await loadQuestionsFromCloud();
-
+      questions = JSON.parse(localStorage.getItem('litsey_tests')) || defaultQuestions;
       if (questions.length === 0) {
         alert("Hozircha test savollari yuklanmagan!");
         return;
@@ -1157,7 +1144,7 @@ Yosh matematiklar va fiziklar maktabi nomi bilan 1991 yilda ustoz To’xtamurod 
       container.innerHTML = '';
       questions.forEach((item, index) => {
         let html = `<div class="question-card">
-          <div class="question-title">${item.q}</div>`;
+          <div class="question-title">${index + 1}. ${item.q}</div>`;
         item.options.forEach((opt, optIndex) => {
           html += `
             <label class="option-label">
@@ -1224,7 +1211,6 @@ Yosh matematiklar va fiziklar maktabi nomi bilan 1991 yilda ustoz To’xtamurod 
       document.getElementById('test-active-view').style.display = 'none';
       document.getElementById('test-result-view').style.display = 'none';
       document.getElementById('admin-panel-view').style.display = 'none';
-      loadQuestionsFromCloud();
     }
 
     function showAdminLogin() {
@@ -1245,7 +1231,7 @@ Yosh matematiklar va fiziklar maktabi nomi bilan 1991 yilda ustoz To’xtamurod 
       }
     }
 
-    async function addQuestion() {
+    function addQuestion() {
       const q = document.getElementById('q-text').value.trim();
       const o0 = document.getElementById('q-opt0').value.trim();
       const o1 = document.getElementById('q-opt1').value.trim();
@@ -1258,76 +1244,30 @@ Yosh matematiklar va fiziklar maktabi nomi bilan 1991 yilda ustoz To’xtamurod 
         return;
       }
 
-      try {
-        let res = await fetch(JSONBIN_URL, {
-          headers: { 'X-Master-Key': API_KEY }
-        });
-        let data = await res.json();
-        let currentList = data.record.questions || [];
+      let currentTests = JSON.parse(localStorage.getItem('litsey_tests')) || [];
+      currentTests.push({ q, options: [o0, o1, o2, o3], correct });
+      localStorage.setItem('litsey_tests', JSON.stringify(currentTests));
 
-        currentList.push({
-          q: `${currentList.length + 1}. ${q}`,
-          options: [o0, o1, o2, o3],
-          correct: correct
-        });
-
-        let updateRes = await fetch(JSONBIN_URL, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Master-Key': API_KEY
-          },
-          body: JSON.stringify({ questions: currentList })
-        });
-
-        if (updateRes.ok) {
-          alert("Savol muvaffaqiyatli qo'shildi va hamma uchun yangilandi!");
-          document.getElementById('q-text').value = '';
-          document.getElementById('q-opt0').value = '';
-          document.getElementById('q-opt1').value = '';
-          document.getElementById('q-opt2').value = '';
-          document.getElementById('q-opt3').value = '';
-          await loadQuestionsFromCloud();
-        } else {
-          alert("Saqlashda xatolik yuz berdi!");
-        }
-      } catch (error) {
-        console.error("Tarmoq xatosi:", error);
-        alert("Tarmoqda xatolik yuz berdi!");
-      }
+      document.getElementById('q-text').value = '';
+      document.getElementById('q-opt0').value = '';
+      document.getElementById('q-opt1').value = '';
+      document.getElementById('q-opt2').value = '';
+      document.getElementById('q-opt3').value = '';
+      updateAdminStatus();
     }
 
-    async function clearAllQuestions() {
+    function clearAllQuestions() {
       if (confirm("Haqiqatan ham barcha savollarni o‘chirmoqchimisiz?")) {
-        try {
-          let updateRes = await fetch(JSONBIN_URL, {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json',
-              'X-Master-Key': API_KEY
-            },
-            body: JSON.stringify({ questions: [] })
-          });
-
-          if (updateRes.ok) {
-            alert("Barcha savollar o'chirildi!");
-            await loadQuestionsFromCloud();
-          } else {
-            alert("O'chirishda xatolik yuz berdi!");
-          }
-        } catch (error) {
-          console.error("Tarmoq xatosi:", error);
-          alert("Tarmoqda xatolik yuz berdi!");
-        }
+        localStorage.setItem('litsey_tests', JSON.stringify([]));
+        updateAdminStatus();
       }
     }
 
-    async function updateAdminStatus() {
-      const statusEl = document.getElementById('admin-status');
-      if (statusEl) {
-        statusEl.innerText = `Hozir bazada jami ${questions.length} ta savol mavjud.`;
-      }
+    function updateAdminStatus() {
+      let currentTests = JSON.parse(localStorage.getItem('litsey_tests')) || [];
+      document.getElementById('admin-status').innerText = `Hozir bazada jami ${currentTests.length} ta savol mavjud.`;
     }
   </script>
+
 </body>
 </html>
