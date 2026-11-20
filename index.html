@@ -1225,13 +1225,11 @@ Yosh matematiklar va fiziklar maktabi nomi bilan 1991 yilda ustoz To’xtamurod 
 
       document.getElementById('display-student-name').innerText = "O‘quvchi: " + nameInput;
       document.getElementById('test-login-view').style.display = 'none';
-      document.getElementById('test-active-view').style.display = 'block';
+     document.getElementById('subjects-view').style.display = 'block';
 
       renderQuestions();
       isTestRunning = true;
-      timeLeft = 7200;
-      startTimer();
-    }
+         }
 
     function renderQuestions() {
       const container = document.getElementById('questions-container');
@@ -1409,6 +1407,60 @@ Yosh matematiklar va fiziklar maktabi nomi bilan 1991 yilda ustoz To’xtamurod 
         statusEl.innerText = `Hozir bazada jami ${questions.length} ta savol mavjud.`;
       }
     }
+  let selectedSubject = "";
+let currentQuestions = [];
+
+// Ism kiritilib "Boshlash" bosilganda ishlaydigan funksiya:
+function proceedToSubjects() {
+    let userName = document.getElementById('user-name').value.trim();
+    if (!userName) {
+        alert("Iltimos, ism va familiyangizni kiriting!");
+        return;
+    }
+    localStorage.setItem('studentName', userName);
+
+    // Ism kiritish oynasini yopib, fanlar oynasini ochamiz
+    document.getElementById('test-login-view').style.display = 'none';
+    document.getElementById('subjects-view').style.display = 'block';
+}
+
+// Fan tugmasi bosilganda ishlaydigan funksiya:
+function selectSubject(subjectName) {
+    selectedSubject = subjectName;
+
+    // JSONbin'dan kelgan savollardan faqat tanlangan fannikilarni ajratib olamiz
+    currentQuestions = questions.filter(q => q.subject === selectedSubject);
+
+    if (currentQuestions.length === 0) {
+        alert("Bu fan bo'yicha hali savollar kiritilmagan!");
+        return;
+    }
+
+    // Fanlar oynasini yopib, test oynasini ochamiz
+    document.getElementById('subjects-view').style.display = 'none';
+    document.getElementById('quiz-view').style.display = 'block';
+
+    // Vaqtni 90 daqiqadan boshlab ishga tushiramiz
+    timeLeft = 5400;
+    startTimer();
+
+    currentQuestionIndex = 0;
+    loadQuestion();
+}
+  function selectSubject(subjectName) {
+    selectedSubject = subjectName;
+    
+    // Fanlar oynasini yopib, test oynasini ochamiz
+    document.getElementById('subjects-view').style.display = 'none';
+    document.getElementById('test-active-view').style.display = 'block';
+    
+    // Taymerni fanga kirganda 90 daqiqadan (5400 soniyadan) boshlaymiz
+    timeLeft = 5400;
+    startTimer();
+    
+    renderQuestions();
+    isTestRunning = true;
+}
   </script>
 
 </body>
