@@ -1183,7 +1183,8 @@ Yosh matematiklar va fiziklar maktabi nomi bilan 1991 yilda ustoz To’xtamurod 
         alert("Tarmoqda xatolik yuz berdi!");
       }
     }
-   
+   async function loadQuestionsFromCloud() {
+      try {
         let response = await fetch(JSONBIN_URL, {
           headers: {
             'X-Master-Key': API_KEY
