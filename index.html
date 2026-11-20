@@ -1090,24 +1090,27 @@ Yosh matematiklar va fiziklar maktabi nomi bilan 1991 yilda ustoz To’xtamurod 
 
     </div>
   </div>
-
 <script>
-    // npoint.io API manzili
-    const NPOINT_URL = 'https://api.npoint.io/bfdc28916e80b1d3fe4f';
+    // JSONbin.io sozlamalari
+    const BIN_ID = '6b00889bac6210605a9809c7';
+    const API_KEY = '$2a$10$sV2PvsmMrvPvwNuELw0mH.fTFU6.mhXwAoleFLebZ2rDbQl1oIT8C';
+    const JSONBIN_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
 
     let questions = [];
     let isTestRunning = false;
     let timerInterval;
     let timeLeft = 2 * 60 * 60;
 
-    // Sahifa ochilganda savollarni npoint.io dan o'qib olamiz
+    // Savollarni bulutdan o'qib olish
     async function loadQuestionsFromCloud() {
       try {
-        let response = await fetch(NPOINT_URL);
+        let response = await fetch(JSONBIN_URL, {
+          headers: {
+            'X-Master-Key': API_KEY
+          }
+        });
         let data = await response.json();
-        
-        // npoint.io ichidagi "questions" massivini olamiz
-        questions = data.questions || [];
+        questions = data.record.questions || [];
       } catch (error) {
         console.error("Savollarni yuklashda xatolik:", error);
         questions = [];
@@ -1115,7 +1118,6 @@ Yosh matematiklar va fiziklar maktabi nomi bilan 1991 yilda ustoz To’xtamurod 
       updateAdminStatus();
     }
 
-    // Sahifa yuklanganda ishga tushadi
     window.addEventListener('DOMContentLoaded', () => {
       loadQuestionsFromCloud();
     });
@@ -1248,5 +1250,84 @@ Yosh matematiklar va fiziklar maktabi nomi bilan 1991 yilda ustoz To’xtamurod 
       const o0 = document.getElementById('q-opt0').value.trim();
       const o1 = document.getElementById('q-opt1').value.trim();
       const o2 = document.getElementById('q-opt2').value.trim();
-      const o3 = document.getElementById('q-opt3').value.trim();</body>
+      const o3 = document.getElementById('q-opt3').value.trim();
+      const correct = parseInt(document.getElementById('q-correct').value);
+
+      if (!q || !o0 || !o1 || !o2 || !o3) {
+        alert("Barcha maydonlarni to‘ldiring!");
+        return;
+      }
+
+      try {
+        let res = await fetch(JSONBIN_URL, {
+          headers: { 'X-Master-Key': API_KEY }
+        });
+        let data = await res.json();
+        let currentList = data.record.questions || [];
+
+        currentList.push({
+          q: `${currentList.length + 1}. ${q}`,
+          options: [o0, o1, o2, o3],
+          correct: correct
+        });
+
+        let updateRes = await fetch(JSONBIN_URL, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Master-Key': API_KEY
+          },
+          body: JSON.stringify({ questions: currentList })
+        });
+
+        if (updateRes.ok) {
+          alert("Savol muvaffaqiyatli qo'shildi va hamma uchun yangilandi!");
+          document.getElementById('q-text').value = '';
+          document.getElementById('q-opt0').value = '';
+          document.getElementById('q-opt1').value = '';
+          document.getElementById('q-opt2').value = '';
+          document.getElementById('q-opt3').value = '';
+          await loadQuestionsFromCloud();
+        } else {
+          alert("Saqlashda xatolik yuz berdi!");
+        }
+      } catch (error) {
+        console.error("Tarmoq xatosi:", error);
+        alert("Tarmoqda xatolik yuz berdi!");
+      }
+    }
+
+    async function clearAllQuestions() {
+      if (confirm("Haqiqatan ham barcha savollarni o‘chirmoqchimisiz?")) {
+        try {
+          let updateRes = await fetch(JSONBIN_URL, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Master-Key': API_KEY
+            },
+            body: JSON.stringify({ questions: [] })
+          });
+
+          if (updateRes.ok) {
+            alert("Barcha savollar o'chirildi!");
+            await loadQuestionsFromCloud();
+          } else {
+            alert("O'chirishda xatolik yuz berdi!");
+          }
+        } catch (error) {
+          console.error("Tarmoq xatosi:", error);
+          alert("Tarmoqda xatolik yuz berdi!");
+        }
+      }
+    }
+
+    async function updateAdminStatus() {
+      const statusEl = document.getElementById('admin-status');
+      if (statusEl) {
+        statusEl.innerText = `Hozir bazada jami ${questions.length} ta savol mavjud.`;
+      }
+    }
+  </script>
+</body>
 </html>
