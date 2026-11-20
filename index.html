@@ -25,17 +25,32 @@
       padding: 0;
     }
 
-    body {
+   body {
       min-height: 100vh;
       font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-      background-color: var(--bg-dark);
       color: var(--text-main);
       overflow-x: hidden;
       position: relative;
       padding: 24px 24px 72px;
+      
+      /* Orqa fonga litsey rasmini qo'yish */
+      background-image: url('images2/litsey.jpg'); /* Litsey rasmingizning nomi */
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
     }
 
-    /* Orqa fon yorug'liklari */
+    /* Rasm ustidan qoramtir parda va blur berish */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: rgba(9, 13, 22, 0.75); /* Qoramtir tus (xohishga ko'ra o'zgartirishingiz mumkin) */
+      backdrop-filter: blur(8px); /* Xiralashtirish (blur) */
+      z-index: -1;
+    }
+
+    /* Orqa fon yorug'liklari 
     .ambient-glow {
       position: fixed;
       width: 420px;
@@ -70,7 +85,7 @@
       transform: translate(-50%, -50%);
       opacity: 0.22;
       animation-delay: -7s;
-    }
+    } */
 
     @keyframes floatGlow {
       0% { transform: translate(0, 0) scale(1); }
