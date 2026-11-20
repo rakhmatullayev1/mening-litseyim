@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Qorako‘l Akademik Litseyi</title>
+  <style>
+    :root {
+      --bg-dark: #090d16;
+      --panel-bg: rgba(15, 23, 42, 0.88);
+      --card-bg: rgba(17, 24, 39, 0.78);
+      --border-light: rgba(255, 255, 255, 0.12);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent-1: #6366f1;
+      --accent-2: #ec4899;
+      --accent-3: #06b6d4;
+      --tg-color: #229ED9;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      overflow-x: hidden;
+      position: relative;
+      padding: 24px 24px 72px;
+    }
+
+    /* Orqa fon yorug'liklari */
+    .ambient-glow {
+      position: fixed;
+      width: 420px;
+      height: 420px;
+      border-radius: 50%;
+      filter: blur(115px);
+      opacity: 0.4;
+      z-index: 0;
+      pointer-events: none;
+      animation: floatGlow 10s ease-in-out infinite alternate;
+    }
+
+    .glow-one {
+      background: var(--accent-1);
+      top: -90px;
+      left: -80px;
+    }
+
+    .glow-two {
+      background: var(--accent-2);
+      bottom: -110px;
+      right: -70px;
+      animation-delay: -4s;
+    }
+
+    .glow-three {
+      width: 280px;
+      height: 280px;
+      background: var(--accent-3);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      opacity: 0.22;
+      animation-delay: -7s;
+    }
+
+    @keyframes floatGlow {
+      0% { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(28px, -22px) scale(1.08); }
+    }
+
+    /* Yashirin checkboxlar (JS-siz boshqaruv) */
+    .hidden-check {
+      position: fixed;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* 3 ustunli asosiy maket */
+    .layout-grid {
+      position: relative;
+      z-index: 1;
+      max-width: 1320px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 72px 1fr 220px;
+      gap: 24px;
+      align-items: start;
+    }
+
+    /* CHAP TOMON: 3 chiziqli tugma */
+    .left-rail {
+      position: sticky;
+      top: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .menu-burger-btn {
+      width: 52px;
+      height: 52px;
+      border-radius: 16px;
+      background: var(--card-bg);
+      border: 1px solid var(--border-light);
+      backdrop-filter: blur(16px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+    }
+
+    .menu-burger-btn:hover {
+      border-color: rgba(129, 140, 248, 0.55);
+      transform: translateY(-2px);
+      background: rgba(99, 102, 241, 0.16);
+    }
+
+    .menu-burger-btn span {
+      display: block;
+      width: 22px;
+      height: 2.5px;
+      border-radius: 999px;
+      background: var(--text-main);
+    }
+
+    /* Yon menyu (Drawer) */
+    .drawer-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(2, 6, 23, 0.72);
+      backdrop-filter: blur(8px);
+      z-index: 900;
+      display: none;
+    }
+
+    .drawer-panel {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: min(340px, 88vw);
+      height: 100vh;
+      background: #0d1526;
+      border-right: 1px solid var(--border-light);
+      z-index: 950;
+      padding: 24px 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transform: translateX(-105%);
+      transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+      box-shadow: 20px 0 60px rgba(0, 0, 0, 0.65);
+    }
+
+    #nav-drawer-toggle:checked ~ .drawer-backdrop {
+      display: block;
+    }
+
+    #nav-drawer-toggle:checked ~ .drawer-panel {
+      transform: translateX(0);
+    }
+
+    .drawer-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 18px;
+      border-bottom: 1px solid var(--border-light);
+      margin-bottom: 20px;
+    }
+
+    .drawer-brand {
+      font-weight: 800;
+      font-size: 1rem;
+      background: linear-gradient(90deg, #818cf8, #f472b6, #22d3ee);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .close-icon-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      border: 1px solid var(--border-light);
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-main);
+      font-size: 1.1rem;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+    }
+
+    .close-icon-btn:hover {
+      background: rgba(236, 72, 153, 0.25);
+    }
+
+    .drawer-links {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .drawer-item {
+      padding: 14px 16px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--text-main);
+      font-size: 0.96rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+
+    .drawer-item:hover {
+      background: rgba(99, 102, 241, 0.16);
+      border-color: rgba(129, 140, 248, 0.4);
+      transform: translateX(4px);
+    }
+
+    .drawer-item.apply-highlight {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(6, 182, 212, 0.2));
+      border-color: rgba(52, 211, 153, 0.45);
+      color: #a7f3d0;
+    }
+
+    /* Yon menyu eng pastidagi FAQ tugmasi */
+    .drawer-faq-btn {
+      margin-top: 16px;
+      padding: 14px 16px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.22), rgba(236, 72, 153, 0.22));
+      border: 1px solid rgba(244, 114, 182, 0.4);
+      color: #ffffff;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: all 0.25s ease;
+    }
+
+    .drawer-faq-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(236, 72, 153, 0.3);
+    }
+
+    /* O'RTA QISM: Ustozlar rasmi va ular haqida ma'lumot */
+    .center-content {
+      width: 100%;
+    }
+
+    .hero-banner {
+      padding: 28px;
+      border-radius: 26px;
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border-light);
+      margin-bottom: 24px;
+      box-shadow: 0 20px 55px rgba(0, 0, 0, 0.45);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 0.76rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: #e0e7ff;
+      background: rgba(99, 102, 241, 0.18);
+      border: 1px solid rgba(129, 140, 248, 0.35);
+      margin-bottom: 14px;
+    }
+
+    .badge-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #34d399;
+      box-shadow: 0 0 10px #34d399;
+    }
+
+    .hero-banner h1 {
+      font-size: clamp(1.6rem, 3.4vw, 2.25rem);
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 10px;
+    }
+
+    .hero-banner h1 span {
+      background: linear-gradient(90deg, #818cf8, #f472b6, #22d3ee);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .hero-banner p {
+      color: var(--text-muted);
+      font-size: 0.96rem;
+      line-height: 1.65;
+    }
+
+    .section-heading {
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: #f1f5f9;
+    }
+
+    .teachers-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 18px;
+    }
+
+    .teacher-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-light);
+      border-radius: 22px;
+      overflow: hidden;
+      backdrop-filter: blur(18px);
+      transition: transform 0.25s ease, border-color 0.25s ease;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+    }
+
+    .teacher-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(129, 140, 248, 0.45);
+    }
+
+    .teacher-card img {
+      width: 100%;
+      height: 210px;
+      object-fit: cover;
+      display: block;
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .teacher-info {
+      padding: 18px;
+    }
+
+    .teacher-role {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #67e8f9;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .teacher-info h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: #ffffff;
+    }
+
+    .teacher-info p {
+      font-size: 0.88rem;
+      line-height: 1.58;
+      color: var(--text-muted);
+    }
+
+    /* O'NG TOMON TEPADA: Telegram va Instagram tugmalari */
+    .right-rail {
+      position: sticky;
+      top: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .social-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 13px 18px;
+      border-radius: 16px;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 0.94rem;
+      color: #ffffff;
+      transition: transform 0.22s ease, box-shadow 0.22s ease, filter 0.22s ease;
+    }
+
+    .telegram-social-btn {
+      background: var(--tg-color);
+      box-shadow: 0 10px 24px rgba(34, 158, 217, 0.35);
+    }
+
+    .telegram-social-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 30px rgba(34, 158, 217, 0.5);
+      filter: brightness(1.06);
+    }
+
+    .instagram-social-btn {
+      background: linear-gradient(45deg, #f58529, #dd2a7b, #8134af, #515bd4);
+      box-shadow: 0 10px 24px rgba(221, 42, 123, 0.32);
+    }
+
+    .instagram-social-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 30px rgba(221, 42, 123, 0.48);
+      filter: brightness(1.06);
+    }
+
+    /* Modallar (Pure CSS) */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      display: none;
+      place-items: center;
+      padding: 20px;
+      z-index: 1200;
+      background: rgba(2, 6, 23, 0.86);
+      backdrop-filter: blur(12px);
+    }
+
+    #modal-apply:checked ~ .backdrop-apply,
+    #modal-about:checked ~ .backdrop-about,
+    #modal-contact:checked ~ .backdrop-contact,
+    #modal-achievements:checked ~ .backdrop-achievements {
+      display: grid;
+    }
+
+    .modal-dismiss {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+    }
+
+    .modal-box {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      max-width: 680px;
+      max-height: 86vh;
+      overflow-y: auto;
+      background: #0f172a;
+      border: 1px solid var(--border-light);
+      border-radius: 24px;
+      padding: 26px;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.8);
+    }
+
+    .modal-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+    }
+
+    .modal-title {
+      font-size: 1.35rem;
+      font-weight: 800;
+      background: linear-gradient(90deg, #e0e7ff, #f9a8d4, #67e8f9);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .quota-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 0.92rem;
+    }
+
+    .quota-table th,
+    .quota-table td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .quota-table th {
+      color: #a5b4fc;
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .quota-table tr.sum-row td {
+      color: #34d399;
+      font-weight: 700;
+    }
+
+    .action-link-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      margin-top: 16px;
+      padding: 13px 18px;
+      border-radius: 14px;
+      text-decoration: none;
+      font-weight: 700;
+      color: #ffffff;
+      background: linear-gradient(135deg, #10b981, #06b6d4);
+    }
+
+    /* Eng pastki footer */
+    .creator-footer {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 50;
+      padding: 12px 20px;
+      text-align: center;
+      font-size: 0.86rem;
+      color: var(--text-muted);
+      background: rgba(9, 13, 22, 0.85);
+      backdrop-filter: blur(12px);
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .creator-footer span {
+      color: #f8fafc;
+      font-weight: 700;
+    }
+
+    @media (max-width: 900px) {
+      .layout-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+
+      .left-rail,
+      .right-rail {
+        position: static;
+        flex-direction: row;
+        align-items: center;
+      }
+
+      .right-rail {
+        justify-content: flex-end;
+        flex-wrap: wrap;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Menyu va modallar uchun checkboxlar -->
+  <input type="checkbox" id="nav-drawer-toggle" class="hidden-check" />
+  <input type="checkbox" id="modal-apply" class="hidden-check" />
+  <input type="checkbox" id="modal-about" class="hidden-check" />
+  <input type="checkbox" id="modal-contact" class="hidden-check" />
+  <input type="checkbox" id="modal-achievements" class="hidden-check" />
+
+  <div class="ambient-glow glow-one"></div>
+  <div class="ambient-glow glow-two"></div>
+  <div class="ambient-glow glow-three"></div>
+
+  <!-- Yon menyu (3 chiziq bosilganda ochiladi) -->
+  <label for="nav-drawer-toggle" class="drawer-backdrop" aria-label="Menyuni yopish"></label>
+  <aside class="drawer-panel">
+    <div>
+      <div class="drawer-top">
+        <span class="drawer-brand">Qorako‘l Akademik Litseyi</span>
+        <label for="nav-drawer-toggle" class="close-icon-btn" title="Yopish">✕</label>
+      </div>
+
+      <nav class="drawer-links">
+        <label for="modal-apply" class="drawer-item apply-highlight">
+          <span>Ariza topshirish</span>
+          <span>→</span>
+        </label>
+        <label for="modal-about" class="drawer-item">
+          <span>Litsey haqida</span>
+          <span>→</span>
+        </label>
+        <label for="modal-contact" class="drawer-item">
+          <span>Litsey bilan bog‘lanish</span>
+          <span>→</span>
+        </label>
+        <label for="modal-achievements" class="drawer-item">
+          <span>Litsey yutuqlari</span>
+          <span>→</span>
+        </label>
+      </nav>
+    </div>
+
+    <!-- Eng pastda FAQ belgisi -> t.me/shuxratovich_l7 -->
+    <a
+      href="https://t.me/shuxratovich_l7"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="drawer-faq-btn"
+    >
+      <span>❓ FAQ</span>
+      
+    </a>
+  </aside>
+
+  <!-- ASOSIY 3 USTUNLI KO'RINISH -->
+  <div class="layout-grid">
+    <!-- CHAP TOMON TEPADA: 3 chiziqli tugma -->
+    <div class="left-rail">
+      <label for="nav-drawer-toggle" class="menu-burger-btn" title="Menyu" aria-label="Menyuni ochish">
+        <span></span>
+        <span></span>
+        <span></span>
+      </label>
+    </div>
+
+    <!-- O'RTA QISM: Ustozlar rasmi va ular haqida ma'lumot -->
+    <main class="center-content">
+      <section class="hero-banner">
+        <div class="badge">
+          <span class="badge-dot"></span>
+          BuxDU Qorako‘l akademik litseyi
+        </div>
+        <h1><span>USTOZLAR VA BILIM MASKANI</span></h1>
+        <p>
+          Litseyimizda yiliga 182 nafar iqtidorli o‘quvchi saralab olinadi. Ustozlarimizning fidokorona mehnati va o‘ziga xos o‘qitish uslubi o‘quvchilarni respublika va xalqaro olimpiadalarga tayyorlaydi.
+        </p>
+      </section>
+
+      <h2 class="section-heading">Ustozlarimiz</h2>
+      <div class="teachers-grid">
+        <article class="teacher-card">
+          <img
+            src="jumayev.jpg"
+            alt="Ustozlar va litsey jamoasi"
+          />
+          <div class="teacher-info">
+            <div class="teacher-role">Maktab asoschisi</div>
+            <h3>To‘xtamurod Jumayev</h3>
+            <p>
+              1991-yilda Yosh matematiklar va fiziklar maktabiga asos solgan tajribali ustoz. “Qorako‘lcha o‘qitish uslubi” shakllanishida beqiyos hissa qo‘shgan.
+            </p>
+          </div>
+        </article>
+
+        <article class="teacher-card">
+          <img
+            src="g'.hasanov.jpg"
+            alt="Litsey rahbariyati va ustozlar"
+          />
+          <div class="teacher-info">
+            <div class="teacher-role">Litsey direktori</div>
+            <h3>G‘olibjon Jumaqulov</h3>
+            <p>
+              Litsey jamoasini zamonaviy ta’lim va yuqori intizom asosida boshqarib, o‘quvchilarning olimpiada hamda fan yutuqlarini izchil mustahkamlab kelmoqda.
+            </p>
+          </div>
+        </article>
+
+        <article class="teacher-card">
+          <img
+            src="https://cdn.uza.uz/2025/10/20/13/07/bWAwSEfX2Joe4gJWhnVF7UKC26d4Hpyp_normal.jpg"
+            alt="Fan o‘qituvchilari jamoasi"
+          />
+          <div class="teacher-info">
+            <div class="teacher-role">Pedagogik jamoa</div>
+            <h3>Aniq, Tabiiy va Gumanitar fanlar ustozlari</h3>
+            <p>
+              Har bir o‘quvchi bilan individual ishlaydigan, kechki guruh mashg‘ulotlari va olimpiada tayyorgarligini yuqori saviyada olib boradigan fidoyi ustozlar.
+            </p>
+          </div>
+        </article>
+      </div>
+    </main>
+
+    <!-- O'NG TOMON TEPADA: Telegram va Instagram tugmalari -->
+    <aside class="right-rail">
+      <a
+        href="https://t.me/"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="social-btn telegram-social-btn"
+      >
+        <span>✈</span>
+        <span>Telegram</span>
+      </a>
+
+      <a
+        href="https://instagram.com/"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="social-btn instagram-social-btn"
+      >
+        <span>◎</span>
+        <span>Instagram</span>
+      </a>
+    </aside>
+  </div>
+
+  <!-- MODAL 1: Ariza topshirish -->
+  <div class="modal-backdrop backdrop-apply">
+    <label for="modal-apply" class="modal-dismiss"></label>
+    <div class="modal-box">
+      <div class="modal-head">
+        <h2 class="modal-title">Ariza topshirish</h2>
+        <label for="modal-apply" class="close-icon-btn">✕</label>
+      </div>
+      <p style="color: #cbd5e1; line-height: 1.65; margin-bottom: 14px;">
+        Akademik litseyga hujjat topshirish rasmiy <strong>my.edu.uz</strong> portali orqali onlayn tarzda amalga oshiriladi.
+      </p>
+      <a
+        href="https://my.edu.uz"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="action-link-btn"
+      >
+        my.edu.uz saytiga o‘tish →
+      </a>
+    </div>
+  </div>
+
+  <!-- MODAL 2: Litsey haqida (3 ta yo'nalish) -->
+  <div class="modal-backdrop backdrop-about">
+    <label for="modal-about" class="modal-dismiss"></label>
+    <div class="modal-box">
+      <div class="modal-head">
+        <h2 class="modal-title">Litsey haqida</h2>
+        <label for="modal-about" class="close-icon-btn">✕</label>
+      </div>
+      <p style="color: #cbd5e1; line-height: 1.65;">
+        BuxDU Qorako‘l akademik litseyida quyidagi 3 ta yo‘nalish bo‘yicha qabul kvotalari belgilangan:
+      </p>
+      <table class="quota-table">
+        <thead>
+          <tr>
+            <th>№</th>
+            <th>Yo‘nalish</th>
+            <th>Kvota</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1</td>
+            <td>Aniq fanlar</td>
+            <td>104 ta o‘quvchi</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td>Tabiiy fanlar</td>
+            <td>26 ta o‘quvchi</td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td>Ijtimoiy va gumanitar fanlar</td>
+            <td>52 ta o‘quvchi</td>
+          </tr>
+          <tr class="sum-row">
+            <td colspan="2">Jami</td>
+            <td>182 ta o‘quvchi</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- MODAL 3: Litsey bilan bog'lanish -->
+  <div class="modal-backdrop backdrop-contact">
+    <label for="modal-contact" class="modal-dismiss"></label>
+    <div class="modal-box">
+      <div class="modal-head">
+        <h2 class="modal-title">Litsey bilan bog‘lanish</h2>
+        <label for="modal-contact" class="close-icon-btn">✕</label>
+      </div>
+      <p style="color: #cbd5e1; line-height: 1.65; margin-bottom: 14px;">
+        <!-- Bog'lanish matnini shu yerda o'zgartiring -->
+        Savollar va murojaatlar uchun bog‘lanish raqami:
+      </p>
+      <a
+        href="tel:+998881157377"
+        style="display: inline-block; padding: 12px 18px; border-radius: 12px; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(52, 211, 153, 0.4); color: #6ee7b7; font-weight: 700; text-decoration: none; font-size: 1.05rem;"
+      >
+        +998881157377
+      </a>
+    </div>
+  </div>
+
+  <!-- MODAL 4: Litsey yutuqlari -->
+  <div class="modal-backdrop backdrop-achievements">
+    <label for="modal-achievements" class="modal-dismiss"></label>
+    <div class="modal-box">
+      <div class="modal-head">
+        <h2 class="modal-title">Litsey yutuqlari</h2>
+        <label for="modal-achievements" class="close-icon-btn">✕</label>
+      </div>
+
+      <!-- Litsey rasmi (src ichiga rasm manzilini qo'ying) -->
+      <div style="width: 100%; margin-bottom: 18px; border-radius: 16px; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.12);">
+        <img
+          src="https://cdn.uza.uz/2025/08/14/13/52/LioMIMrhgZUSiOGjtyim7fjZbs6XTHm5_front.jpg"
+          alt="Litsey rasmi"
+          style="display: block; width: 100%; max-height: 280px; object-fit: cover;"
+        />
+      </div>
+
+      <!-- Pastda litsey tarixi -->
+      <div style="color: #cbd5e1; line-height: 1.7; font-size: 0.96rem;">
+        <p style="margin-bottom: 10px;">
+          <!-- Litsey tarixi matnini shu yerga yozing -->
+          
+
+
+Yosh matematiklar va fiziklar maktabi nomi bilan 1991 yilda ustoz To’xtamurod Murtazoyevich Jumayev tashkilotchiligida ish boshlagan bilim dargohi ta`lim-tarbiyadagi o`ziga xos uslubi bilan “Jahonga yuz tutgan maktab” bo’lib dong taratdi va 2009 yildan Buxoro davlat universiteti Qorako`l akademik litseyi maqomini olib yurtimizga tanildi. Bu maktab jamoasi bugungi kunga kelib respublikamizda “Qorako`lcha o`qitish usuli”, “Qorako`l maktabi” kabi til bibliklari bilan keng yoyilishi uchun beshik bo`lgan jamoa hisoblanadi. Jamoa ustoz To’xtamurod Jumayevning tadbirkorligi, rahbarlik mahorati mahsuli sifatida ulkan zafarlarni qo’lga kiritdi va ayni chog’da Ustozning shogirdi, zamon bilan hamnafas, ilg’or fikrlar egasi G’olibjon Jumaqulov rahbarligida yutuqlarni yanada ko`paytirib, mustahkamlab, obro`-e`tiborini orttirib bormoqda. Hozirgi kungacha respublikamiz fan olimpiadalarida 54 ta imtiyozli diplom qo’lga kiritildi. Jahon va xalqaro fan olimpiadalarida qatnashgan 90 nafardan ortiq o’quvchilarimiz 1 ta oltin, 15 ta kumush va 31 ta bronza- jami 47 ta medalni,ko’plab o’quvchilar diplomlarni qo’lga kiritdilar va dunyoda o’zbek farzandlarining hech kimdan kam emasligini ko’p bor tasdiqladilar.Donolar izidan borishni o`ziga shior qilgan jamoa har bir ishni aniq va puxta reja asosida qilishga odatlangan. Bu ishda jamoa boshlig`i G`olibjon Jumaqulovning bilimdonligi va bamaslahat ish ko`rishi qo`l kelmoqda. Ishning samarasi esa natijalarda o`z tasdig`ini topmoqda.Jamoaning har bir a`zosi bilim oluvchilarga e`tiborli bo`lib, belgilangan kun tartibi asosida o`quvchilarning to`g`ri o`sib-ulg’ayishi uchun har bir ishga mas’uliyat bilan yondashmoqdalar. Prezidentimiz Sh. Mirziyoyevning “Yoshlarimizni doimo yangicha fikrlash, o’ylash va yashashga o’rgatishimiz kerak” degan so’zlari o’zining amaliy isbotiga ega bo’lmoqda.“Ba`zi ota-onalar: “Farzandimizning boshqa joyda bo`lganidan ko`ra shu litseyda bo`lgani yaxshiroq, ko`nglimiz to`q va xotirjam bo`lamiz, bu yerda tartib- intizom, ovqatlanish va e`tibor juda yaxshi”,- deyishadi. Bu gaplar bejizga aytilmaydi, albatta, xalq ishonchini qozonish qiyin, lekin yillar davomidagi mashaqqatli mehnat evaziga erishilgan ishonchni saqlab qolish esa juda mashaqqatlidir”,- deydi litsey direktori G`. Jumaqulov. Litseyda o`quvchilarning kunlik vaqti to`g`ri taqsimlangani uchun undan maksimal darajada ijobiy yo`lda foydalanish imkonini bermoqda.Har kun ertalab soat 6:00 da uyqudan turish va 40 daqiqa davomida badantarbiya mashqlari bilan shug`ullanish, so`ng yuvinish va 7dan 40 daqiqa o`tganicha ovqatlanish, 8:00 dan 14:20 gacha dars mashg`ulotlarida qatnashish, darsdan so`ng sport o`yinlari, musobaqa va ommaviy tadbirlarda qatnashish ,kitob o`qish , qo`shiq tinglab dam olish, soat 16:00 dan 17:20 gacha guruh mashg`ulotlarida maxsus fan o`qituvchilari rahbarligida qatnashish, soat 18:00 gacha dam olish, 18:45 gacha kechki ovqatlanish, 19:00 dan 22:00 gacha kechki tarbiyachilari nazoratida uy vazifalarini bajarish va o’zlarini qiziqtirgan savollariga javob izlash, soat 23:00 dan ertalab 6:00 gacha kechki uyqu- o`quvchining bir kunlik vaqti ana shunday taqsimlangan. Bunda, albatta, “o`quvchining bo`sh vaqti dushmanning ish vaqti” hikmatli so`ziga amal qilingan. Odatda, hozirgi paytda yoshlar orasida jinoyatchilikning ko`payishi, ularning kattalar e`tiboridan chetda- bekorchi bo`lib qolishidan kelib chiqmoqda.  Bizning litseyda esa shunday kamchilikning oldi olingan.Litseyda ishning to`g`ri tashkil qilingani muvaffaqiyatlar kaliti bo`lib xizmat qilmoqda. Har haftada ikki marta olimpiadachi o`quvchilar bilan mashg`ulotlar olib borish, ularning fan sirlarini chuqur egallashlariga imkon bermoqda. Bunda jonkuyar fan o`qituvchilarining mehnati alohida e`tiborga loyiqdir. Natija esa mehnatga yarasha bo`lmoqda. Keyingi besh yillikni e`tiborga olsak, respublika fan olimpiadasi va tanlovlarda 10 ta diplom, jahon va xalqaro fan olimpiadalarida 12 ta medal va diplomning qo`lga kiritilgani so`zimizning isbotidir.2016 yilda fan olimpiadasining IV respublika bosqichida matematika fanidan Yaxshiyev Jamshid II darajali diplom, “Ilmgohim - iftixorim” respublika ko’rik-tonlovida fizika fanidan Nurmonov Sirojiddin I darajali diplom, matematika fanidan Abduqayumov Abdumalik II darajali diplom bilan taqdirlandi.2017 yil Toshkent shahrida o’tkazilgan Lomonosov olimpiadasida matematika fanidan Abduqayumov Abdumalik kumush medalni qo’lga kiritdi, IV bosqich respublika olimpiadasida esa I darajali diplom bilan taqdirlandi.2018 yilda IV bosqich respublika olimpiadasida ona tili va adabiyot fanidan Askarova Maftuna va biologiya fanidan Iskandarova Zebo II darajali diplomga ega bo’ldi.2019 yilda matematika fanidan Mirzayev Nodirjon III darajali diplomni qo’lga kiritdi.2019 yil oktyabr oyida biologiya fanidan respublika miqiyosida Jizzax viloyatida o`tkazilgan Abu Ali Ibn Sino olimpiadasida 2-bosqich talabasi Karimov Ravshanbek I darajali diplomni egallab, 22300000 so`m pul mukofotini, ustozi G`oyibova Dilbar 18955000 so`m pul mukofotini qo’lga kiritdi.Buxoro viloyatida respublika bo’yicha matematika fanidan o`tkazilgan Mirzo Ulug`bek nomidagi olimpiadada 2-bosqich o`quvchisi Hasanov Shaxboz G`olibjon o`g`li II darajali diplomni egallab 18955000 so`m pul mikofoti, ustozi Hidoyatov Iftixor 14495000 pul mukofoti bilan taqdirlanishi barchamizni quvontirdi.Xalqaro olimpialarda erishilgan yutuqlar salmog’i yanada yuqoridir.2017 yil Abduqayumov Abdumalik matematika bo`yicha Qozog`iston va Brazilyada 2 ta kumush medalga, Nurmonov Sirojiddin fizika fani bo`yicha Qozog`istonda kumush medalga, Tailandda diplomga ega bo`lib qaytishdi.2018 yilda matematika fani bo`yicha Qozog`istonda otkazilgan olimpiadada Abdullayev Salimxo`ja kumush medal, Imomov Jasur, Toshpolatov Elbeklar bronza medali bilan taqdirlandi.2019 yil uzoq kutilgan oltin medalni Qozogistonda otkazilgan matematika olimpiadasida Sayliyev Abbos qo’lga kiritgan bo’lsa, Imomov Jasur va Toshpo’latov Elbek kumush medalni, Abdullayev Salimxo’ja bronza medalni qo’lga kiritdi. Buyuk Britaniyaning London shahrida otkazilgan jahon olimpiadasida Imomov Jasur bronza medalga ega bo’lib barchamizni suyuntirdi.2020 yil Qozog`istonda otkazilgan matematika olimpiadasida Hasanov Shaxboz muvaffaqiyatli qatnashib bronza medalga ega bo`ldi va litseyimizning medallar shodasini boyitdi.Shu o’rinda e’tiborga molik bir haqiqat diqqatimizni tortadi. O’zi litsey jamoasi a’zosi bo’lib, mashaqqatli mehnat bilan birgalikda farzandini olimpiada g’olibi bo’lishga undagan, unga ustozlik qilganlarga har qancha havas qilsak arziydi. 2005 yil matematika fani bo’yicha olimpiadaning respublika bosqichi g’olibi Jahongir Mirzoqulovning otasi Oltin Mirzoqulov, 2008 yilda Ispaniyada o’tkazilgan jahon matematika olimpiadasida bronza medal egasi Sherzod Safoyevning otasi Jumanazar Mustafoyev, 2019 yilda Buxoro shahrida o’tkazilgan Mirzo Ulug’bek nomidagi respublika olimpiadasida II darajali diplom va 2020 yil Qozog`istonda o’tkazilgan matematika olimpiadasida bronza medalga ega bo’lgan Hasanov Shaxbozning otasi G’olibjon Jumaqulov o’rnida bo’lishni kim istamaydi deysiz. Har bir sinfga qabul qilingan o`quvchilar bilan yaqindan ish olib borish guruh rahbari va fan o`qituvchisining asosiy maqsadi bo`lmog`i lozim. O`qituvchilarni o`quvchilarning o`zlari tanlashi ixtiyoriy bo`lgani uchun bilim darajasi yuqori bo`lgan o`quvchini o`qitish oson kechmaydi, albatta. Agar o`quvchi ko`ngliga yo`l topolmas ekan xoh guruh rahbari, xoh fan o`qituvchisi bo`lsin ko’zlangan maqsadga erishib bo’lmaydi. Shunday ekan akademik litseyda o`qituvchi bo`lib ishlashni barcha o’qituvchilar ham eplay olmaydi. Demak akademik litseyga o`qituvchilar ham yuqori darajadagi tanlov asosida qabul qilinadi va o`qituvchidan doimiy ravishda o`z ustida ishlashi, zamonaviy bilim va o`qitish usullarini o`rganib borishi talab etiladi. Elu-yurt manfaati yo’lidagi ezgu amallarni umrining mazmuni deb bilgan bunday o’qituvchilar haqiqiy ustozlardir. Ilm dargohi tashkil topganidan shu kungacha fizika fani o’qituvchisi va uzoq yillar davomida direktorning ilmiy ishlar bo’yicha o’rinbosari lavozimida ishlab kelayotgan Ne’mat Bozorov, o’qituvchilardan Karomat Hamdamov, Saodat Tursunova, Fazilat Ashurova, Dildora Hikmatova, Hamid Eshmurodov, Matluba Boboyevalar shunday ustozlardan hisoblanadi.Olimpiadachi o`quvchilar bilan ishlash alohida bilim, tajriba va mas’uliyat bilan yondashuvni talab etadi. Olimpiadaga qatnashishni istagan o’quvchilar bilan har haftada ikki marta mashg`ulot o`tish bilan birga, vaqti-vaqti bilan o`tkazib turiladigan litsey olimpiadasiga alohida e`tibor qaratiladi. O`qituvchi-hakamlar biron o`quvchiga yon bosishiga yo`l qo`ymaydi. Toki barcha o`quvchi bir-birini tan olib rozi bo`lgunucha olimpiada qayta o`tkazilaveradi. Shundagina ochiqchasiga “aql jangi” bo`ladi va o`quvchilarning olimpiada g’olibi bo’lishga ishtiyoqi ortadi. Olimpiadachi o`quvchilarni adabiyotlar bilan ta’minlash, savollarga to`liq javob topishida ularga ko`maklashish fan o`qituvchisining zimmasidagi muhim vazifalaridan biri hisoblanadi. Shuning uchun ham bunday oqituvchi alohida hurmatga sazovordir.Akademik litseyda o`quv jarayonidagi yutuqlar ildizini, avvalo, qabul va qabulgacha ko`riladigan tayyorgarlikdan qidirmoq lozim. O`quv yili davomida har oyning oxirgi yakshanba kuni litsey o’qituvchilaridan bir guruhi uchun dam olish emas, balki fidokorlik namoyish qilinadigan kunlardan biri hisoblanadi. Shu kuni 600-800 nafar litseyga kirishni xoxlagan o`quvchilar o`zlari istagan ta’lim yo`nalishi bo`yicha 3 ta fanga doir bilimlarini sinovdan o’tkazadilar. Sinov savollarini litsey o’qituvchilari umumta’lim maktablarining darsliklari asosida tuzib o’quvchilarga tarqatishadi. Savollarga javob yozish uchun uch soat vaqt beriladi. Javoblar tayyor bo’lgach ularni litsey o’qituvchilari tekshirib, baholab, yig’ilgan ballarni e’lon qilishadi. Bu ishda litseyning ilg’or o’quvchilari ustozlariga yaqindan yordam berishadi. Sinov yakunida tuzilgan ro’yxat asosida o’quvchi o’zining tengdoshlari orasidagi o’rnini aniqlab oladi.Buyuk bobokolonimiz Amir Temurning “Adolat har ishda hamrohimiz va dastumiz bo’lsin!”- degan hikmatli so’ziga amal qilgan holda o’tkaziladigan qabul imtihoni har bir yo`nalish uchun belgilangan bir kunda erta tongdan kechgacha davom etadi. Tong soat 6:00 da fan o`qituvchilari navbatchi ota onalar nazorati ostida litsey binosiga kelib soat 8:00 gacha belgilangan test topshiriqlarini tuzadi. Test sirliligi saqlangan holda o`quvchilarga yetkaziladi va o`qituvchilar nazorati ostida imtihon olinadi. Yig`ib olingan javoblar varaqlarini shifrlangan holda ota-onalar nazorati ostida fan o`qituvchilari tekshirishadi. Ballar aniqlanadi, o`quvchilarga apellyatsiya qilish imkoni beriladi. Barcha muammolar hal bo`lgach litseyga qabul qilngan o`quvchilar ro`yxati e`lon qilinadi. Bu jarayondagi shaffoflikka hech kimda e`tiroz bo`lmaydi. Qabulda tanish bilishchilikka butunlay barham berilgan.Guruh rahbari o`quvchilarning o`quv dargohidagi eng yaqin kishisi bo`lmog`i va birinchi kundanoq guruh o`quvchilarining muammo va qiziqishlarini o’rganib, litsey ruhshunosi va yoshlar yetakchisi bilan hamkorlikda targ`ibot va tashviqot ishlarini amalga oshirishi lozim. Birinchi prezidentimiz I.A.Karimov aytganlaridek «Ta`limni tarbiyadan, tarbiyani ta`limdan ajratish mumkin emas». Qabul qilingan o`quvchi yoshlarni litseyning ichki tartib intizomi va qat’iy talablariga ko`nikishlari uchun barcha shart-sharoitlar yaratilgan. Guruh rahbarlari o`quvchilarning tashvishi bilan yashasa o`z farzandiday ko`rib, talabchan va mehribon bo’lsa, bu ustoz hurmarga loyiqdir. Shunday ustozlarga Mustafoyev Jumanazar, Jumayeva Gulnora, G`oyibova Dilbar, Jumayev Jahongir, Hidoyatov Iftixor, Boboyev Durmamat, Fayziyev Rahim, Beshimov Akmal, Xo`jayeva Dilfuza, Axmedova Norbibish, Sulaymonov Shuhrat, Jumayev Erkin, Mirzaqulov Oltin va marhum Xolniyozov Sa`dulla kabi ustozlar nomini qayd qilish mumkin.Kechki tarbiyachilik ishi o`quvchilar tartib intizomini to`g`ri yo`lga qo`yishda asosiy omillardan hisoblanadi. Ular ota-ona o`rnini bosadigan, o`quvchilar ichki dunyosi bilan yaqindan tanishib, guruh rahbarlari va litsey rahbariyati bilan yaqin aloqada bo`ladigan, tarbiya jarayonining ajralmas qismi hisoblanadi. Bu borada o’z mehnati bilan Oltin Mirzoqulov, Erkin Jumayev, Sarvar Hasanov, Bekniyoz Rajabov, Zoira Umarova, Guliruh Husenovalar o`quvchilar ko`nglidan chuqur joy olganlar.Akademik litseyda har haftada 6 kun o`qish bo`ladi. Har dushanba ertalab soat 9.00 o`quvchilar hovlida guruh rahbarlari boshchiligida saflanadilar.Akademik litsey rahbariyati tomonidan o`tgan hafta yakunlari, yutuq va kamchiliklar, davomat masalasi aytiladi, g’oliblar rahbariyat tomonidan taqdirlanadi, xatoga yo’l qo’yganlarga uni tuzatish yo’llari korsatib o’tiladi. Boshlanayotgan o’quv haftasida mo’ljallangan vazifalar e’lon qilinadi. Har ikki haftada bir marta barcha o`qituvchi va tarbiyachilar ishtirokida direktor oldi yig`ilishi o`tkazilib, o’tgan vaqt davomidagi yutuq-kamchiliklar muhokama qlinadi va navbatdagi vazifalar belgilanib, topshiriqlar beriladi.Akademik litseyda har oyning oxirgi chorshanbasida barcha o`qituvchilar nazorati ostida o`quvchilar uchun blok testlar olinadi. Testlarni fan o`qituvchilari tuzishadi va blok test o’tkazish mas’ul guruhiga yetkazib qo’yishadi yoki shartnoma asosida DTM testlaridan foydalaniladi. Bunday hollarda test javoblarini DTM ning o’zi tekshirib beradi. Test natijalari bir hafta ichida tekshirib tahlil qilinadi va yo’nalishlar kesimida natijalar e’lon qilinadi. G’oliblar taqdirlanadi, kamchilikka yo’l qo’yganlarga xatolarni tuzatish yo’llari ko’rsatiladi.Akademik litseyda har uch oyda ota-onalar bilan yig’ilish o’tkaziladi. Ustozlar, o’quvchilar va ularning ota-onalardan iborat “ta’lim uchburchagi”ning ahamiyti juda muhimdir. Bunda barcha o’quvchilar ota-onasi qatnashmog’i zarur qilib belgilangan. Bunda o’quvchining har uch oydagi va yil davomidagi ta’lim va tarbiyadagi ko’rsatgichlari o’rganiladi. Ta’lim va tarbiyada erishilgan yutuqlar aytilib, g’oliblarga, olimpiadalar sovrindorlariga mukofotlar tantanali ravishda litsey direktori tomonidan topshiriladi. Xato qilganlar, past o’zlashtiruvchilar o’tirgan o’rniga qarab baholanadi, chunki majlisda har o’quvchi va ota-onasi o’zlashtirishiga qarab o’tqazib chiqiladiki, bunda har bir ota-ona qaysi o’rinda o’tirganiga qarab farzandining gurugdagi o’rnini ikkilanmasdan anglaydi. Har bir guruhning o’quvchilari qanday o’zlashtirishga erishgani uch oyda o’tkazilgan blok testlar natijalari asosida shakllantirilgan ro’yxatda ko’rinib turadi. Ro’yxatga o’quvchilar ismi, sharifi to’plangan ballar yig’indisi kamayib boorish tartibida joylashtiriladi. Yuqori o’rinni olgan o’quvchi dastlab aytiladi, unga qarsaklar chalib olqishlanadi. Keyingi o’quvchilar ketma-ketlikda o’qiladi. 55% dan kam o’zlashtirganlarga qattiq tanbeh beriladi. Fan o’qituvchilarining fikri tinglanadi. Majlis so’ngida o’quvchilar va ota-onalarning litseyda olib borilayotgan ishlarga munosabati va fikrlarini aytish uchun imkon beriladi. Taklif va mulohazalari o’rganib boriladi. So’ngra sinf xonalarida har bir guruh rahbari va fan o’qituvchilari o’quvchilar o’zlashtirishi va tartib-intizomi haqida suhbatni davom ettirishadi, xulosa va yakunlar chiqarilib navbatdagi rajalar belgilab olinadi. Ta’lim muassasamizning asosiy vazifasi o’quvchilarni yuqori bilim va yuksak ma’naviyatga ega holda oliy ta’lim dargohlariga kirib, talabalik baxtiga erishtirmoq hisoblanadi. Bunday maqsadga erishayotganimizni so’nggi yillardagi oliygohlarga o’quvchilarimizning kirish foizlaridan ham bilishimiz mumkin. Ya’ni: 2016 yil 76%, 2017 yil 82 %, 2018 yil 93%, 2019 yil 90% lik natija ko’rsatildi va respublikada 1-o’rin qayd etilmoqda.Hozirgi kungacha litseyni bitirib chiqqan 2826 nafar o’quvchining 225 nafari oliygohga kirish arafasida turgan bo’lsa, qolganlari oliygohlarda bilim olish bilan band yoki oliygohni tugatganlari, vatan va xalq farovonligi uchun chin dildan mehnat qilmoqdalar.Litsey bitiruvchilari orasida 10 dan ziyod fan doktorlari, ko’pdan ko’p davlat boshqaruvi va muhim strategik ahamiyatga ega korxonalarning mas’ul xodimlari sifatida ish yuritmoqdalar.Litsey jamoasidan bir necha ustozlar ilmiy maqola va darsliklar yaratib O’zbekiston ta’limini rivojlantirishga o’z hissalarini qo’shib kelmoqdalar. Bularga litsey direktori G’. Jumaqulov hamda J. Jumayev, A. Beshimov kabi ustozlarni misol qilib keltirishimiz mumkin.O’zaro hamkorlikBuxoro davlat universiteti bilan hamkorlikning to’g’ri yo’lga qo’yilgani muammolarga oson yechim topishda qo’l kelmoqda. Uneversitet professor-o’ituvchilarining litseyga kelib mashg’ulotlar o’tishi, o’quvchilarimizning esa universitetga borib nazariy va amaliy bilimlarini oshirib turishlari oliygohlar haqidagi tasavvurlarining boyishiga olib kelmoqda. Universitet homiyligida iqtisodiy muammolar hal qilinishi ezgu ishlar samaradorligiga o’zining ijobiy ta’sirini ko’rsatmoqda. Bu borada Davlat test markazi, O’zbekiston milliy universiteti, Farg’ona mashinasozlik instituti, Buxoro muhandislik texnologiya instituti va xalqaro miqyosda Malayziyaning USIM universiteti bilan yo’lga qo’yilgan hamkorlik o’zining ijobiy natijasini bermoqda.E`tirof va kelajakka ishonch Akademik litsey binosi zamon talablari asosida jihozlanib, unda yangi kompyuter sinflari va internet sensorli ekran bilan eksklyuziv video kuzatuv moslamalari o`rnatilgan, masofaviy ta`limga mo`ljallangan dars xonalari tashkil qilinmoqda. Qorako`l tumanidan boshqa uzoq tuman, viloyatlardan kelgan o`quvchilarga bepul yotoqxona va davlat hisobidan ovqatlanish uchun qo`shimcha mablag`lar ajratilmoqda. O’quv adabiyotlari bilan o`quvchilar to’la ta’minlangan, 9800 dan ziyod kitob fondiga ega bo’lgan kutubxona o`quvchilar uchun xizmat qilmoqda.Akademik litseyda erishilayotgan har bir yutuq moddiy rag’batlantirilishi belgilab qo’yilgan, ya’ni viloyat miqyosidagi olimpiada va ko’rik-tanlovlardagi yutuqlari uchun o’quvchiga 200000 so’m, o’qituvchisiga 400000 so’m, respublika miqyosida o’quvchiga 700000 so’m, o’qituvchiga 700000 so’m, xalqaro miqyosda esa o’qituvchi va o’quvchiga 1200000 so’mdan mukofot beriladi.Bundan tashqari, O’zbekiston Respublikasi prezidentining 1212-sonli qaroriga asosan litsey bitiruvchilarining 80 foizdan ortig’i oliygoh talabasi bo’lishga erishgani uchun litsey direktori va tegishli fan o’qituvchilarini yarim yil davomida oylik  maoshining 50 foizi miqdorida ustama bilan taqdirlanmoqda.Ta’lim maskanida xizmat qilayotgan 58 nafar pedagogning aksariyati ustozlar ishini faxr bilan davom ettirayotgan litseyning sobiq o’quvchilaridir. Akademik litsey jamoasining mashaqqatli mehnatlari davlatimiz tomonidan yuksak qadrlanib, ularning 25 nafari “Xalq maorifi a’lochisi” bir nafari “Oliy va o’rta maxsus kasb-hunar ta’limi a’lochisi” ko’krak nishonlariga ega bo’lsa, besh nafar ustoz Davlat mukofotlariga lozim topilgan. O’tgan davr mobaynida ta’lim dargog’ining tashkilotchisi Jumayev To’xtamurod Murtazoyevich “O’zbekiston Respublikasi xalq o’qituvchisi” unvoni va “El-yurt hurmati” ordeni bilan, Sobirov Bahriddin Po’latovich “O’zbekistonda xizmat ko’rsatgan yoshlar murabbiyi” unvoni bilan, Mustafoyev Jumanazar Safoyevich “Shuhrat” medali bilan, Isoyev Norxon Kichikovich va Jumayeva Gulnora Boboqulovnalar “Mehnat shuhrati” ordeni bilan munosib taqdirlandi. Ishonchimiz komilki, akademik litseyning jonkuyar, talabchan, qat’iy fikrga ega G’olibjon Hasanovich Jumaqulov rahbarligidagi jamoasi aziz yurtimiz uchun har jihatdan munosib farzandlarni yetishtirib berishda tinimsiz izlanish va mehnatdan tolmaydi.Ushbu maqolamiz ilm maskanining tashkilolotchisi, jonkuyar va fidoyi ustoz To’xtamurod Jumayev tavallud kunining 75 yilligiga munosib tuhfa bo’ladi degan umiddamiz.Akademik litsey MMIBDO’:   N. Isoyev
+        </p>
+        <p>
+          <!-- Qo'shimcha xatboshi (xohlasangiz o'zgartiring yoki o'chiring) -->
+          Qo‘shimcha tarixiy ma’lumotlar shu yerda yoziladi.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ENG PASTKI FOOTER -->
+  <footer class="creator-footer">
+    Sayt yaratuvchisi: <span>R.Azimjon</span>
+  </footer>
+
+</body>
+</html>
