@@ -557,6 +557,36 @@
       color: #f8fafc;
       font-weight: 700;
     }
+    /* O'ng pastki burchakdagi Telegram bot/chat tugmasi */
+    .floating-tg-bot {
+      position: fixed;
+      right: 26px;
+      bottom: 62px;
+      z-index: 850;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #27a7e7, #1577b8);
+      box-shadow: 0 10px 28px rgba(29, 149, 224, 0.48), 0 0 0 1px rgba(255, 255, 255, 0.15) inset;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      text-decoration: none;
+      transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.25s ease, filter 0.25s ease;
+    }
+
+    .floating-tg-bot:hover {
+      transform: translateY(-4px) scale(1.06);
+      box-shadow: 0 16px 36px rgba(29, 149, 224, 0.65);
+      filter: brightness(1.07);
+    }
+
+    .floating-tg-bot svg {
+      width: 32px;
+      height: 32px;
+      fill: #ffffff;
+    }
 
     @media (max-width: 900px) {
       .layout-grid {
@@ -620,16 +650,7 @@
       </nav>
     </div>
 
-    <!-- Eng pastda FAQ belgisi -> t.me/shuxratovich_l7 -->
-    <a
-      href="https://t.me/NazarovNozimbek"
-      target="_blank"
-      rel="noopener noreferrer"
-      class="drawer-faq-btn"
-    >
-      <span>❓ FAQ</span>
-      
-    </a>
+
   </aside>
 
   <!-- ASOSIY 3 USTUNLI KO'RINISH -->
@@ -847,6 +868,18 @@ Yosh matematiklar va fiziklar maktabi nomi bilan 1991 yilda ustoz To’xtamurod 
       </div>
     </div>
   </div>
+  <!-- O'ng pastki burchakdagi Telegram chat tugmasi -->
+  <a
+    href="https://t.me/shuxratovich_l7"
+    target="_blank"
+    rel="noopener noreferrer"
+    class="floating-tg-bot"
+    title="Telegram orqali bog'lanish"
+  >
+    <svg viewBox="0 0 24 24">
+      <path d="M12 2C6.48 2 2 6.48 2 12c0 1.85.5 3.58 1.37 5.06L2 22l5.1-1.35C8.55 21.36 10.23 22 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2zm1 14h-2v-2h2v2zm0-4h-2V7h2v5z"/>
+    </svg>
+  </a>
 
   <!-- ENG PASTKI FOOTER -->
   <footer class="creator-footer">
