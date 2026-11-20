@@ -1031,7 +1031,20 @@ Yosh matematiklar va fiziklar maktabi nomi bilan 1991 yilda ustoz To’xtamurod 
           <span class="admin-toggle-link" onclick="showAdminLogin()">🔒 Ustoz (Admin) uchun test yuklash</span>
         </div>
       </div>
-
+<!-- Fanlarni tanlash oynasi -->
+<div id="subjects-view" style="display: none; text-align: center; padding: 20px;">
+    <h3 style="color: #fff; margin-bottom: 20px;">Fanlardan birini tanlang:</h3>
+    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
+        <button class="test-btn" onclick="selectSubject('Matematika')">Matematika</button>
+        <button class="test-btn" onclick="selectSubject('IQ')">IQ</button>
+        <button class="test-btn" onclick="selectSubject('Fizika')">Fizika</button>
+        <button class="test-btn" onclick="selectSubject('Biologiya')">Biologiya</button>
+        <button class="test-btn" onclick="selectSubject('Kimyo')">Kimyo</button>
+        <button class="test-btn" onclick="selectSubject('Ingliz tili')">Ingliz tili</button>
+        <button class="test-btn" onclick="selectSubject('Ona tili')">Ona tili</button>
+        <button class="test-btn" onclick="selectSubject('Huquq')">Huquq</button>
+    </div>
+</div>
       <!-- 2. TEST JARAYONI QISMI -->
       <div id="test-active-view" style="display: none;">
         <div class="timer-bar">
