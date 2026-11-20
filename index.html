@@ -8,11 +8,11 @@
   <style>
     :root {
       --bg-dark: #090d16;
-      --panel-bg: rgba(15, 23, 42, 0.5); /* 0.88 o'rniga 0.5 qilindi */
-      --card-bg: rgba(17, 24, 39, 0.55); /* 0.78 o'rniga 0.55 qilindi */
-      --border-light: rgba(255, 255, 255, 0.15);
+      --panel-bg: rgba(15, 23, 42, 0.35); /* Shaffof panel */
+      --card-bg: rgba(17, 24, 39, 0.4);  /* Kartochkalar shaffoflashadi va orqadagi rasm ochiq ko'rinadi */
+      --border-light: rgba(255, 255, 255, 0.2);
       --text-main: #f8fafc;
-      --text-muted: #94a3b8;
+      --text-muted: #cbd5e1;
       --accent-1: #6366f1;
       --accent-2: #ec4899;
       --accent-3: #06b6d4;
@@ -41,12 +41,12 @@
     }
 
     /* Rasm ustidan qoramtir parda va blur berish */
-   body::before {
+ body::before {
       content: '';
       position: fixed;
       inset: 0;
-      background: rgba(9, 13, 22, 0.3); /* 0.75 o'rniga 0.3 qildik, parda och bo'ladi */
-      backdrop-filter: blur(2px); /* Xiralikni biroz kamaytirdik */
+      background: rgba(9, 13, 22, 0.1); /* Juda yengil parda, rasm aniq ko'rinadi */
+      backdrop-filter: blur(0px); /* Xiralik umuman yo'q */
       z-index: -1;
     }
 
