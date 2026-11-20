@@ -1104,10 +1104,16 @@ Yosh matematiklar va fiziklar maktabi nomi bilan 1991 yilda ustoz To’xtamurod 
     let timerInterval;
     let timeLeft = 2 * 60 * 60;
 
+  // Admin login oynasini ochish funksiyasi
+    function showAdminLogin() {
+      document.getElementById('test-login-view').style.display = 'none';
+      document.getElementById('admin-panel-view').style.display = 'block';
+      document.getElementById('admin-auth').style.display = 'block';
+      document.getElementById('admin-creator').style.display = 'none';
+    }
 
-    // ⭐ MANA BU YERGA (loadQuestionsFromCloud funksiyasidan oldinga) QO'YASIZ:
 
-    // Admin statusi va savollar ro'yxatini chiqarish hamda har biriga o'chirish tugmasini berish
+   
     async function updateAdminStatus() {
       const statusEl = document.getElementById('admin-status');
       if (statusEl) {
