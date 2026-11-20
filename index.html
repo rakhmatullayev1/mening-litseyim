@@ -1100,7 +1100,7 @@ Yosh matematiklar va fiziklar maktabi nomi bilan 1991 yilda ustoz To’xtamurod 
     let timerInterval;
     let timeLeft = 2 * 60 * 60;
 
-    // Sahifa ochilganda savollarni cloud (npoint.io) dan o'qib olamiz
+    // Sahifa ochilganda savollarni npoint.io dan o'qib olamiz
     async function loadQuestionsFromCloud() {
       try {
         let response = await fetch(NPOINT_URL);
@@ -1248,71 +1248,5 @@ Yosh matematiklar va fiziklar maktabi nomi bilan 1991 yilda ustoz To’xtamurod 
       const o0 = document.getElementById('q-opt0').value.trim();
       const o1 = document.getElementById('q-opt1').value.trim();
       const o2 = document.getElementById('q-opt2').value.trim();
-      const o3 = document.getElementById('q-opt3').value.trim();
-      const correct = parseInt(document.getElementById('q-correct').value);
-
-      if (!q || !o0 || !o1 || !o2 || !o3) {
-        alert("Barcha maydonlarni to‘ldiring!");
-        return;
-      }
-
-      // Avval hozirgi savollarni tortib olamiz
-      try {
-        let res = await fetch(NPOINT_URL);
-        let json = await res.json();
-        let currentList = json.questions || [];
-
-        // Yangi savolni qo'shamiz
-        currentList.push({
-          q: `${currentList.length + 1}. ${q}`,
-          options: [o0, o1, o2, o3],
-          correct: correct
-        });
-
-        // npoint.io ga yangilangan ro'yxatni PUT so'rovi orqali saqlaymiz
-        let updateRes = await fetch(NPOINT_URL, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ questions: currentList })
-        });
-
-        if (updateRes.ok) {
-          alert("Savol muvaffaqiyatli qo'shildi va hamma uchun yangilandi!");
-          document.getElementById('q-text').value = '';
-          document.getElementById('q-opt0').value = '';
-          document.getElementById('q-opt1').value = '';
-          document.getElementById('q-opt2').value = '';
-          document.getElementById('q-opt3').value = '';
-          await loadQuestionsFromCloud();
-        } else {
-          alert("Saqlashda xatolik yuz berdi!");
-        }
-      } catch (error) {
-        console.error(error);
-        alert("Tarmoqda xatolik yuz berdi!");
-      }
-    }
-
-    async function clearAllQuestions() {
-      if (confirm("Haqiqatan ham barcha savollarni o‘chirmoqchimisiz?")) {
-        try {
-          await fetch(NPOINT_URL, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ questions: [] })
-          });
-          alert("Barcha savollar o'chirildi!");
-          await loadQuestionsFromCloud();
-        } catch (error) {
-          console.error(error);
-          alert("O'chirishda xatolik yuz berdi!");
-        }
-      }
-    }
-
-    async function updateAdminStatus() {
-      document.getElementById('admin-status').innerText = `Hozir bazada jami ${questions.length} ta savol mavjud.`;
-    }
-  </script>
-</body>
+      const o3 = document.getElementById('q-opt3').value.trim();</body>
 </html>
