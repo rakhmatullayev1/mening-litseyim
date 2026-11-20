@@ -1092,35 +1092,24 @@ Yosh matematiklar va fiziklar maktabi nomi bilan 1991 yilda ustoz To’xtamurod 
   </div>
 
 <script>
-    // SheetDB API manzili
-    const SHEETDB_URL = 'https://sheetdb.io/api/v1/w5wp675kcb9dt';
+    // npoint.io API manzili
+    const NPOINT_URL = 'https://api.npoint.io/bfdc28916e80b1d3fe4f';
 
     let questions = [];
     let isTestRunning = false;
     let timerInterval;
     let timeLeft = 2 * 60 * 60;
 
-    // Sahifa ochilganda savollarni bazadan yuklab olamiz
+    // Sahifa ochilganda savollarni cloud (npoint.io) dan o'qib olamiz
     async function loadQuestionsFromCloud() {
       try {
-        let response = await fetch(SHEETDB_URL);
+        let response = await fetch(NPOINT_URL);
         let data = await response.json();
         
-        // Google Jadvalidan kelgan ma'lumotlarni test formatiga o'g'iramiz
-        questions = data.map((item, index) => {
-          return {
-            q: `${index + 1}. ${item.Savol || item.savol}`,
-            options: [
-              item.A || '',
-              item.B || '',
-              item.C || '',
-              item.D || ''
-            ],
-            correct: parseInt(item.togriJavob || item.TogriJavob || 0)
-          };
-        });
+        // npoint.io ichidagi "questions" massivini olamiz
+        questions = data.questions || [];
       } catch (error) {
-        console.error("Savolarni yuklashda xatolik:", error);
+        console.error("Savollarni yuklashda xatolik:", error);
         questions = [];
       }
       updateAdminStatus();
@@ -1144,11 +1133,10 @@ Yosh matematiklar va fiziklar maktabi nomi bilan 1991 yilda ustoz To’xtamurod 
         return;
       }
 
-      // Test boshlanishidan oldin eng yangi savollarni tortib olamiz
       await loadQuestionsFromCloud();
 
       if (questions.length === 0) {
-        alert("Hozircha test savollari yuklanmagan yoki internetda xatolik bor!");
+        alert("Hozircha test savollari yuklanmagan!");
         return;
       }
 
@@ -1261,33 +1249,35 @@ Yosh matematiklar va fiziklar maktabi nomi bilan 1991 yilda ustoz To’xtamurod 
       const o1 = document.getElementById('q-opt1').value.trim();
       const o2 = document.getElementById('q-opt2').value.trim();
       const o3 = document.getElementById('q-opt3').value.trim();
-      const correct = document.getElementById('q-correct').value;
+      const correct = parseInt(document.getElementById('q-correct').value);
 
       if (!q || !o0 || !o1 || !o2 || !o3) {
         alert("Barcha maydonlarni to‘ldiring!");
         return;
       }
 
-      // Google Jadvallari ustun nomlariga moslab obyekt tuzamiz
-      const newRow = {
-        Savol: q,
-        A: o0,
-        B: o1,
-        C: o2,
-        D: o3,
-        togriJavob: correct
-      };
-
+      // Avval hozirgi savollarni tortib olamiz
       try {
-        // SheetDB ga ma'lumotni POST so'rovi orqali yuboramiz (hamma uchun saqlanadi)
-        let response = await fetch(SHEETDB_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ data: [newRow] })
+        let res = await fetch(NPOINT_URL);
+        let json = await res.json();
+        let currentList = json.questions || [];
+
+        // Yangi savolni qo'shamiz
+        currentList.push({
+          q: `${currentList.length + 1}. ${q}`,
+          options: [o0, o1, o2, o3],
+          correct: correct
         });
 
-        if (response.ok) {
-          alert("Savol barcha uchun muvaffaqiyatli qo'shildi!");
+        // npoint.io ga yangilangan ro'yxatni PUT so'rovi orqali saqlaymiz
+        let updateRes = await fetch(NPOINT_URL, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ questions: currentList })
+        });
+
+        if (updateRes.ok) {
+          alert("Savol muvaffaqiyatli qo'shildi va hamma uchun yangilandi!");
           document.getElementById('q-text').value = '';
           document.getElementById('q-opt0').value = '';
           document.getElementById('q-opt1').value = '';
@@ -1304,11 +1294,12 @@ Yosh matematiklar va fiziklar maktabi nomi bilan 1991 yilda ustoz To’xtamurod 
     }
 
     async function clearAllQuestions() {
-      if (confirm("Haqiqatan ham Google jadvalidagi barcha savollarni o‘chirmoqchimisiz?")) {
+      if (confirm("Haqiqatan ham barcha savollarni o‘chirmoqchimisiz?")) {
         try {
-          // SheetDB da hammasini o'chirish uchun DELETE so'rovi (all=true)
-          await fetch(`${SHEETDB_URL}/all`, {
-            method: 'DELETE'
+          await fetch(NPOINT_URL, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ questions: [] })
           });
           alert("Barcha savollar o'chirildi!");
           await loadQuestionsFromCloud();
@@ -1320,10 +1311,8 @@ Yosh matematiklar va fiziklar maktabi nomi bilan 1991 yilda ustoz To’xtamurod 
     }
 
     async function updateAdminStatus() {
-      await loadQuestionsFromCloud();
       document.getElementById('admin-status').innerText = `Hozir bazada jami ${questions.length} ta savol mavjud.`;
     }
   </script>
-
 </body>
 </html>
