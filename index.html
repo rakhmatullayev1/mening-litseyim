@@ -1078,6 +1078,21 @@ Yosh matematiklar va fiziklar maktabi nomi bilan 1991 yilda ustoz To’xtamurod 
         </div>
 
        <div id="admin-creator" style="display: none;">
+        <!-- OMMAVIY MATN KIRITISH QISMI -->
+        <div style="margin-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.15); padding-top: 15px;">
+          <p style="color: #38bdf8; margin-bottom: 8px; font-weight: 650;">📋 Ommaviy savol kiritish (Word / Matndan nusxalab tashlash):</p>
+          <p style="color: #94a3b8; font-size: 0.8rem; margin-bottom: 10px; line-height: 1.4;">
+            Format shunday bo‘lishi kerak:<br>
+            1. Savol matni?<br>
+            A) Variant 1<br>
+            B) Variant 2<br>
+            C) Variant 3<br>
+            D) Variant 4<br>
+            Javob: C
+          </p>
+          <textarea id="bulk-text" class="test-input" style="height: 140px; font-size: 13px; font-family: monospace;" placeholder="Savollarni shu yerga nusxalab tashlang..."></textarea>
+          <button class="test-btn success" style="width: 100%; margin-top: 6px;" onclick="addBulkQuestions()">📥 Barcha savollarni ommaviy saqlash</button>
+        </div>
           <p style="color: #34d399; margin-bottom: 12px; font-weight: 600;">Yangi savol qo‘shish:</p>
           <!-- Fan nomini tanlash -->
           <select id="q-subject" class="test-input" style="background: #1e293b;">
@@ -1432,6 +1447,89 @@ Yosh matematiklar va fiziklar maktabi nomi bilan 1991 yilda ustoz To’xtamurod 
           console.error("Tarmoq xatosi:", error);
           alert("Tarmoqda xatolik yuz berdi!");
         }
+      }
+    }
+    // Ommaviy matndan savollarni avtomatik o'qib saqlash funksiyasi
+    async function addBulkQuestions() {
+      const subject = document.getElementById('q-subject').value;
+      const rawText = document.getElementById('bulk-text').value.trim();
+      
+      if (!rawText) {
+        alert("Iltimos, matn oynasiga savollarni kiriting!");
+        return;
+      }
+
+      // Matnni bo'sh qatorlar bo'yicha bloklarga ajratamiz
+      let blocks = rawText.split(/\n\s*\n/).filter(b => b.trim() !== "");
+      let newQuestions = [];
+
+      for (let block of blocks) {
+        let lines = block.split('\n').map(l => l.trim()).filter(l => l !== "");
+        if (lines.length < 5) continue;
+
+        let qText = lines[0].replace(/^\d+\.\s*/, ''); // Raqamini olib tashlaymiz
+        let options = [];
+        let correctIndex = 0;
+
+        // A, B, C, D variantlarini yig'ib olamiz
+        let optionLines = lines.slice(1, 5);
+        for (let optLine of optionLines) {
+          let cleanOpt = optLine.replace(/^[A-Da-d][\)\.]\s*/, '');
+          options.push(cleanOpt);
+        }
+
+        // To'g'ri javobni aniqlaymiz (Masalan: Javob: C)
+        let ansLine = lines.find(l => l.toLowerCase().includes('javob') || l.toLowerCase().includes('ответ'));
+        if (ansLine) {
+          let ansLetter = ansLine.replace(/[^A-Da-d]/g, '').toUpperCase();
+          if (ansLetter === 'A') correctIndex = 0;
+          else if (ansLetter === 'B') correctIndex = 1;
+          else if (ansLetter === 'C') correctIndex = 2;
+          else if (ansLetter === 'D') correctIndex = 3;
+        }
+
+        if (qText && options.length === 4) {
+          newQuestions.push({
+            subject: subject,
+            q: qText,
+            options: options,
+            correct: correctIndex
+          });
+        }
+      }
+
+      if (newQuestions.length === 0) {
+        alert("Savollarni o‘qib bo‘lmadi! Format talabga mos kelishini tekshiring (Savol, 4 ta variant va 'Javob: harfi' bo‘lishi shart).");
+        return;
+      }
+
+      try {
+        let res = await fetch(JSONBIN_URL, { headers: { 'X-Master-Key': API_KEY } });
+        let data = await res.json();
+        let currentList = data.record.questions || [];
+
+        // Yangi savollarni eski ro'yxatga qo'shamiz
+        currentList.push(...newQuestions);
+
+        let updateRes = await fetch(JSONBIN_URL, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Master-Key': API_KEY
+          },
+          body: JSON.stringify({ questions: currentList })
+        });
+
+        if (updateRes.ok) {
+          alert(`Muvaffaqiyatli! "${subject}" faniga ${newQuestions.length} ta savol qo'shildi.`);
+          document.getElementById('bulk-text').value = '';
+          await loadQuestionsFromCloud();
+        } else {
+          alert("Saqlashda xatolik yuz berdi!");
+        }
+      } catch (error) {
+        console.error("Tarmoq xatosi:", error);
+        alert("Tarmoqda xatolik yuz berdi!");
       }
     }
 </script>
