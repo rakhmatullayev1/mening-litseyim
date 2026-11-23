@@ -1079,6 +1079,17 @@ Yosh matematiklar va fiziklar maktabi nomi bilan 1991 yilda ustoz To’xtamurod 
 
        <div id="admin-creator" style="display: none;">
           <p style="color: #34d399; margin-bottom: 12px; font-weight: 600;">Yangi savol qo‘shish:</p>
+          <!-- Fan nomini tanlash -->
+          <select id="q-subject" class="test-input" style="background: #1e293b;">
+            <option value="Matematika">Matematika</option>
+            <option value="IQ">IQ</option>
+            <option value="Fizika">Fizika</option>
+            <option value="Biologiya">Biologiya</option>
+            <option value="Kimyo">Kimyo</option>
+            <option value="Ingliz tili">Ingliz tili</option>
+            <option value="Ona tili">Ona tili</option>
+            <option value="Huquq">Huquq</option>
+          </select>
           <input type="text" id="q-text" class="test-input" placeholder="Savol matnini kiriting..." />
           <input type="text" id="q-opt0" class="test-input" placeholder="A variant..." />
           <input type="text" id="q-opt1" class="test-input" placeholder="B variant..." />
@@ -1113,11 +1124,13 @@ Yosh matematiklar va fiziklar maktabi nomi bilan 1991 yilda ustoz To’xtamurod 
     const JSONBIN_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
 
     let questions = [];
+    let currentQuestions = [];
+    let selectedSubject = "";
     let isTestRunning = false;
     let timerInterval;
-   let timeLeft = 1.5 * 60 * 60;
+    let timeLeft = 2 * 60 * 60; // 2 soat
 
-  // Admin login oynasini ochish funksiyasi
+    // Admin login oynasini ochish
     function showAdminLogin() {
       document.getElementById('test-login-view').style.display = 'none';
       document.getElementById('admin-panel-view').style.display = 'block';
@@ -1125,9 +1138,20 @@ Yosh matematiklar va fiziklar maktabi nomi bilan 1991 yilda ustoz To’xtamurod 
       document.getElementById('admin-creator').style.display = 'none';
     }
 
+    // Admin parolini tekshirish
+    function verifyAdmin() {
+      const pass = document.getElementById('admin-pass').value;
+      if (pass === 'azimjon09') {
+        document.getElementById('admin-auth').style.display = 'none';
+        document.getElementById('admin-creator').style.display = 'block';
+        updateAdminStatus();
+      } else {
+        alert("Parol noto‘g‘ri!");
+      }
+    }
 
-   
-    async function updateAdminStatus() {
+    // Admin panelda savollar ro'yxatini ko'rsatish
+    function updateAdminStatus() {
       const statusEl = document.getElementById('admin-status');
       if (statusEl) {
         statusEl.innerText = `Hozir bazada jami ${questions.length} ta savol mavjud.`;
@@ -1143,10 +1167,11 @@ Yosh matematiklar va fiziklar maktabi nomi bilan 1991 yilda ustoz To’xtamurod 
       }
 
       questions.forEach((item, index) => {
+        const subjBadge = item.subject ? `[${item.subject}] ` : '';
         container.innerHTML += `
           <div style="background: rgba(255, 255, 255, 0.05); padding: 10px; margin-bottom: 8px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center;">
             <div style="color: #fff; font-size: 13px; padding-right: 8px; word-break: break-all;">
-              <strong>${item.q}</strong>
+              <span style="color: #38bdf8; font-weight: bold;">${subjBadge}</span><strong>${item.q}</strong>
             </div>
             <button onclick="deleteSpecificQuestion(${index})" class="test-btn danger" style="padding: 6px 10px; font-size: 12px; width: auto; margin: 0;">O'chirish</button>
           </div>
@@ -1154,27 +1179,16 @@ Yosh matematiklar va fiziklar maktabi nomi bilan 1991 yilda ustoz To’xtamurod 
       });
     }
 
-    // Faqat bitta tanlangan savolni bazadan o'chirish
+    // Bitta savolni o'chirish
     async function deleteSpecificQuestion(index) {
-      if (!confirm(`Haqiqatan ham ushbu savolni o'chirmoqchimisiz?`)) {
-        return;
-      }
+      if (!confirm(`Haqiqatan ham ushbu savolni o'chirmoqchimisiz?`)) return;
 
       try {
-        let res = await fetch(JSONBIN_URL, {
-          headers: { 'X-Master-Key': API_KEY }
-        });
+        let res = await fetch(JSONBIN_URL, { headers: { 'X-Master-Key': API_KEY } });
         let data = await res.json();
         let currentList = data.record.questions || [];
 
-        // Tanlangan savolni o'chirib tashlaymiz
         currentList.splice(index, 1);
-
-        // Qolgan savollarning raqamlarini tartibga keltiramiz (1, 2, 3...)
-        currentList.forEach((item, idx) => {
-          let cleanText = item.q.replace(/^\d+\.\s*/, '');
-          item.q = `${idx + 1}. ${cleanText}`;
-        });
 
         let updateRes = await fetch(JSONBIN_URL, {
           method: 'PUT',
@@ -1196,13 +1210,11 @@ Yosh matematiklar va fiziklar maktabi nomi bilan 1991 yilda ustoz To’xtamurod 
         alert("Tarmoqda xatolik yuz berdi!");
       }
     }
-   async function loadQuestionsFromCloud() {
+
+    // Bazadan savollarni yuklash
+    async function loadQuestionsFromCloud() {
       try {
-        let response = await fetch(JSONBIN_URL, {
-          headers: {
-            'X-Master-Key': API_KEY
-          }
-        });
+        let response = await fetch(JSONBIN_URL, { headers: { 'X-Master-Key': API_KEY } });
         let data = await response.json();
         questions = data.record.questions || [];
       } catch (error) {
@@ -1216,12 +1228,14 @@ Yosh matematiklar va fiziklar maktabi nomi bilan 1991 yilda ustoz To’xtamurod 
       loadQuestionsFromCloud();
     });
 
+    // Boshqa oynaga o'tib ketishni nazorat qilish
     document.addEventListener("visibilitychange", function() {
       if (document.hidden && isTestRunning) {
         finishTest("Diqqat! Boshqa oynaga o‘tilgani sababli test avtomatik yakunlandi.");
       }
     });
 
+    // 1. Ism kiritib fanlar oynasiga o'tish
     async function startTest() {
       const nameInput = document.getElementById('student-name').value.trim();
       if (!nameInput) {
@@ -1238,18 +1252,38 @@ Yosh matematiklar va fiziklar maktabi nomi bilan 1991 yilda ustoz To’xtamurod 
 
       document.getElementById('display-student-name').innerText = "O‘quvchi: " + nameInput;
       document.getElementById('test-login-view').style.display = 'none';
-     document.getElementById('subjects-view').style.display = 'block';
+      document.getElementById('subjects-view').style.display = 'block';
+    }
 
+    // 2. Tanlangan fan bo'yicha savollarni ochish
+    function selectSubject(subjectName) {
+      selectedSubject = subjectName;
+      
+      // Faqat tanlangan fanga tegishli savollarni filtrlaymiz
+      currentQuestions = questions.filter(item => item.subject === selectedSubject);
+
+      if (currentQuestions.length === 0) {
+        alert(`Hozircha "${selectedSubject}" fani bo‘yicha savollar kiritilmagan!`);
+        return;
+      }
+
+      document.getElementById('subjects-view').style.display = 'none';
+      document.getElementById('test-active-view').style.display = 'block';
+      
+      timeLeft = 2 * 60 * 60; // 2 soat
+      startTimer();
       renderQuestions();
       isTestRunning = true;
-         }
+    }
 
+    // Savollarni ekranga chiqarish
     function renderQuestions() {
       const container = document.getElementById('questions-container');
       container.innerHTML = '';
-      questions.forEach((item, index) => {
+      currentQuestions.forEach((item, index) => {
+        let cleanQuestion = item.q.replace(/^\d+\.\s*/, '');
         let html = `<div class="question-card">
-          <div class="question-title">${item.q}</div>`;
+          <div class="question-title">${index + 1}. ${cleanQuestion}</div>`;
         item.options.forEach((opt, optIndex) => {
           html += `
             <label class="option-label">
@@ -1262,6 +1296,7 @@ Yosh matematiklar va fiziklar maktabi nomi bilan 1991 yilda ustoz To’xtamurod 
       });
     }
 
+    // Taymer
     function startTimer() {
       clearInterval(timerInterval);
       timerInterval = setInterval(() => {
@@ -1279,20 +1314,21 @@ Yosh matematiklar va fiziklar maktabi nomi bilan 1991 yilda ustoz To’xtamurod 
       }, 1000);
     }
 
+    // Testni yakunlash va natijani hisoblash
     function finishTest(reasonText) {
       if (!isTestRunning) return;
       isTestRunning = false;
       clearInterval(timerInterval);
 
       let score = 0;
-      questions.forEach((item, index) => {
+      currentQuestions.forEach((item, index) => {
         const selected = document.querySelector(`input[name="q_${index}"]:checked`);
         if (selected && parseInt(selected.value) === item.correct) {
           score++;
         }
       });
 
-      const percentage = Math.round((score / questions.length) * 100);
+      const percentage = Math.round((score / currentQuestions.length) * 100);
       const name = document.getElementById('student-name').value;
 
       document.getElementById('test-active-view').style.display = 'none';
@@ -1300,7 +1336,7 @@ Yosh matematiklar va fiziklar maktabi nomi bilan 1991 yilda ustoz To’xtamurod 
       document.getElementById('finish-reason').innerText = reasonText;
       document.getElementById('res-name').innerText = name;
       document.getElementById('res-percentage').innerText = percentage + "%";
-      document.getElementById('res-details').innerText = `${questions.length} ta savoldan ${score} tasiga to‘g‘ri javob berdingiz.`;
+      document.getElementById('res-details').innerText = `${currentQuestions.length} ta savoldan ${score} tasiga to‘g‘ri javob berdingiz (${selectedSubject}).`;
     }
 
     function forceCloseTest() {
@@ -1313,31 +1349,16 @@ Yosh matematiklar va fiziklar maktabi nomi bilan 1991 yilda ustoz To’xtamurod 
       isTestRunning = false;
       clearInterval(timerInterval);
       document.getElementById('test-login-view').style.display = 'block';
+      document.getElementById('subjects-view').style.display = 'none';
       document.getElementById('test-active-view').style.display = 'none';
       document.getElementById('test-result-view').style.display = 'none';
       document.getElementById('admin-panel-view').style.display = 'none';
       loadQuestionsFromCloud();
     }
 
-    function showAdminLogin() {
-      document.getElementById('test-login-view').style.display = 'none';
-      document.getElementById('admin-panel-view').style.display = 'block';
-      document.getElementById('admin-auth').style.display = 'block';
-      document.getElementById('admin-creator').style.display = 'none';
-    }
-
-    function verifyAdmin() {
-      const pass = document.getElementById('admin-pass').value;
-      if (pass === 'azimjon09') {
-        document.getElementById('admin-auth').style.display = 'none';
-        document.getElementById('admin-creator').style.display = 'block';
-        updateAdminStatus();
-      } else {
-        alert("Parol noto‘g‘ri!");
-      }
-    }
-
+    // Yangi savolni fani bilan qo'shish
     async function addQuestion() {
+      const subject = document.getElementById('q-subject').value;
       const q = document.getElementById('q-text').value.trim();
       const o0 = document.getElementById('q-opt0').value.trim();
       const o1 = document.getElementById('q-opt1').value.trim();
@@ -1351,14 +1372,13 @@ Yosh matematiklar va fiziklar maktabi nomi bilan 1991 yilda ustoz To’xtamurod 
       }
 
       try {
-        let res = await fetch(JSONBIN_URL, {
-          headers: { 'X-Master-Key': API_KEY }
-        });
+        let res = await fetch(JSONBIN_URL, { headers: { 'X-Master-Key': API_KEY } });
         let data = await res.json();
         let currentList = data.record.questions || [];
 
         currentList.push({
-          q: `${currentList.length + 1}. ${q}`,
+          subject: subject,
+          q: q,
           options: [o0, o1, o2, o3],
           correct: correct
         });
@@ -1373,7 +1393,7 @@ Yosh matematiklar va fiziklar maktabi nomi bilan 1991 yilda ustoz To’xtamurod 
         });
 
         if (updateRes.ok) {
-          alert("Savol muvaffaqiyatli qo'shildi va hamma uchun yangilandi!");
+          alert(`Savol "${subject}" faniga muvaffaqiyatli qo'shildi!`);
           document.getElementById('q-text').value = '';
           document.getElementById('q-opt0').value = '';
           document.getElementById('q-opt1').value = '';
@@ -1389,6 +1409,7 @@ Yosh matematiklar va fiziklar maktabi nomi bilan 1991 yilda ustoz To’xtamurod 
       }
     }
 
+    // Barcha savollarni o'chirish
     async function clearAllQuestions() {
       if (confirm("Haqiqatan ham barcha savollarni o‘chirmoqchimisiz?")) {
         try {
@@ -1413,68 +1434,6 @@ Yosh matematiklar va fiziklar maktabi nomi bilan 1991 yilda ustoz To’xtamurod 
         }
       }
     }
-
-    async function updateAdminStatus() {
-      const statusEl = document.getElementById('admin-status');
-      if (statusEl) {
-        statusEl.innerText = `Hozir bazada jami ${questions.length} ta savol mavjud.`;
-      }
-    }
-  let selectedSubject = "";
-let currentQuestions = [];
-
-// Ism kiritilib "Boshlash" bosilganda ishlaydigan funksiya:
-function proceedToSubjects() {
-    let userName = document.getElementById('user-name').value.trim();
-    if (!userName) {
-        alert("Iltimos, ism va familiyangizni kiriting!");
-        return;
-    }
-    localStorage.setItem('studentName', userName);
-
-    // Ism kiritish oynasini yopib, fanlar oynasini ochamiz
-    document.getElementById('test-login-view').style.display = 'none';
-    document.getElementById('subjects-view').style.display = 'block';
-}
-
-// Fan tugmasi bosilganda ishlaydigan funksiya:
-function selectSubject(subjectName) {
-    selectedSubject = subjectName;
-
-    // JSONbin'dan kelgan savollardan faqat tanlangan fannikilarni ajratib olamiz
-    currentQuestions = questions.filter(q => q.subject === selectedSubject);
-
-    if (currentQuestions.length === 0) {
-        alert("Bu fan bo'yicha hali savollar kiritilmagan!");
-        return;
-    }
-
-    // Fanlar oynasini yopib, test oynasini ochamiz
-    document.getElementById('subjects-view').style.display = 'none';
-    document.getElementById('quiz-view').style.display = 'block';
-
-    // Vaqtni 90 daqiqadan boshlab ishga tushiramiz
-    timeLeft = 5400;
-    startTimer();
-
-    currentQuestionIndex = 0;
-    loadQuestion();
-}
-  function selectSubject(subjectName) {
-    selectedSubject = subjectName;
-    
-    // Fanlar oynasini yopib, test oynasini ochamiz
-    document.getElementById('subjects-view').style.display = 'none';
-    document.getElementById('test-active-view').style.display = 'block';
-    
-    // Taymerni fanga kirganda 90 daqiqadan (5400 soniyadan) boshlaymiz
-    timeLeft = 5400;
-    startTimer();
-    
-    renderQuestions();
-    isTestRunning = true;
-}
-  </script>
-
+</script>
 </body>
 </html>
